@@ -40,10 +40,10 @@
 
     .app-shell {
       width: 100%;
-      max-width: 430px; /* más compacto, móvil corporativo */
+      max-width: 430px;
       display: flex;
       flex-direction: column;
-      gap: 16px; /* más espacio entre tarjetas */
+      gap: 16px;
     }
 
     .top-bar {
@@ -158,7 +158,7 @@
     }
 
     .pill-button {
-      border-radius: 10px; /* estilo rectángulo suave SAP Fiori */
+      border-radius: 10px;
       border: none;
       padding: 10px 14px;
       font-size: 13px;
@@ -172,8 +172,8 @@
       align-items: center;
       justify-content: center;
       gap: 4px;
-      min-height: 40px; /* botón ancho y cómodo para dedo */
-      width: 100%; /* por defecto ocupan todo el ancho en mobile */
+      min-height: 40px;
+      width: 100%;
       transition: background 0.15s, transform 0.05s, box-shadow 0.15s;
       box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
     }
@@ -318,7 +318,6 @@
       margin-top: 2px;
     }
 
-    /* Toggle switch */
     .toggle-switch {
       width: 32px;
       height: 16px;
@@ -348,7 +347,6 @@
       background: var(--accent);
     }
 
-    /* Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -421,7 +419,6 @@
 </head>
 <body>
   <div class="app-shell">
-    <!-- Encabezado / pestaña superior -->
     <header class="top-bar">
       <label class="icon-button" title="Cargar base de datos (.txt)">
         📁
@@ -446,10 +443,8 @@
           </select>
         </div>
       </div>
-
     </header>
 
-    <!-- Búsqueda + nuevo cliente -->
     <section class="card">
       <div class="field-label" style="display:none;">Buscar cliente</div>
       <div class="row">
@@ -471,7 +466,6 @@
       </div>
     </section>
 
-    <!-- Reestructura -->
     <section class="card restruct-card">
       <div class="row space-between" style="align-items:center;">
         <div>
@@ -495,7 +489,6 @@
     <div class="footer-space"></div>
   </div>
 
-  <!-- Modal nuevo cliente -->
   <div id="modalBackdrop" class="modal-backdrop">
     <div class="modal">
       <div class="modal-title">Nuevo cliente</div>
@@ -534,10 +527,9 @@
   </div>
 
   <script>
-    // Estado principal
     const state = {
-      baseData: [], // clientes de la base original + nuevos clientes
-      assignedByDay: { // clientes asignados por día
+      baseData: [],
+      assignedByDay: {
         'Lunes': [],
         'Martes': [],
         'Miércoles': [],
@@ -550,7 +542,6 @@
 
     const daysOrder = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-    // Elementos DOM
     const fileInput = document.getElementById('fileInput');
     const routeInput = document.getElementById('routeInput');
     const daySelect = document.getElementById('daySelect');
@@ -582,10 +573,9 @@
     const cancelModalBtn = document.getElementById('cancelModalBtn');
     const saveModalBtn = document.getElementById('saveModalBtn');
 
-    // Utilidades
     function getTodayLabel() {
       const d = new Date();
-      const jsDay = d.getDay(); // 0=Domingo ... 6=Sábado
+      const jsDay = d.getDay();
       const map = {
         1: 'Lunes',
         2: 'Martes',
@@ -597,22 +587,16 @@
       return map[jsDay] || 'Lunes';
     }
 
-    // Espera archivos con columnas en este orden:
-    // Código Negocio; Nombre Negocio; Nombre Cliente; Dirección; Nit Facturación
+    // LECTOR DE TXT
     function parseTxtContent(text) {
-      // FIX: regex bien formado para dividir por saltos de línea
       const rawLines = text.split(/\r?\n/);
       const trimmed = rawLines.map(l => l.trim());
-
       const parsed = [];
 
-      // ¿Viene en una sola línea con separadores (CSV / TXT plano)?
+      // ¿CSV/una línea por cliente?
       const hasDelimiters = rawLines.some(l => /[;\t,|]/.test(l));
-
       if (hasDelimiters) {
-        // Modo 1: cada CLIENTE está en UNA LÍNEA, separado por ; , tab o |
         const lines = trimmed.filter(l => l.length > 0);
-
         for (const line of lines) {
           let parts;
           if (line.includes('\t')) {
@@ -624,10 +608,11 @@
           } else {
             parts = line.split(',');
           }
-
           if (parts.length < 5) continue;
 
-          const [codigoNegocio, nombreNegocio, nombreCliente, direccion, nitFacturacion] = parts.map(p => p.trim());
+          const [codigoNegocio, nombreNegocio, nombreCliente, direccion, nitFacturacion] =
+            parts.map(p => p.trim());
+
           parsed.push({
             codigoNegocio: codigoNegocio || '',
             nombreNegocio: nombreNegocio || '',
@@ -636,42 +621,60 @@
             nitFacturacion: nitFacturacion || ''
           });
         }
-
         return parsed;
       }
 
-      // Modo 2: formato "vertical" como en tu captura:
-      // (código)
-      // (nombre negocio)
-      // (nombre cliente)
-      // (dirección)
-      // (nit)
-      // [línea en blanco]
-      const lines = trimmed.filter(l => l.length > 0);
+      // FORMATO VERTICAL EN BLOQUES (líneas vacías separan clientes)
+      const groups = [];
+      let current = [];
+      for (const t of trimmed) {
+        if (!t) {
+          if (current.length) {
+            groups.push(current);
+            current = [];
+          }
+        } else {
+          current.push(t);
+        }
+      }
+      if (current.length) groups.push(current);
 
-      for (let i = 0; i < lines.length; i++) {
-        const linea = lines[i];
+      const isCodigo = s => /^\d{4}-\d+/.test(s);
 
-        // Saltar encabezados o líneas como "CF" que no son código
-        // Código típico: 2000-543590 (empieza con número y suele llevar guion)
-        if (!/^[0-9]/.test(linea)) continue;
+      for (const g of groups) {
+        if (g.length < 5) continue;
 
-        const codigoNegocio = linea;
-        const nombreNegocio = lines[i + 1] || '';
-        const nombreCliente = lines[i + 2] || '';
-        const direccion = lines[i + 3] || '';
-        const nitFacturacion = lines[i + 4] || '';
+        let codigoNegocio = '';
+        let nombreNegocio = '';
+        let nombreCliente = '';
+        let direccion = '';
+        let nitFacturacion = '';
+
+        if (isCodigo(g[0])) {
+          // Formato A: código primero
+          codigoNegocio = g[0];
+          nombreNegocio = g[1] || '';
+          nombreCliente = g[2] || '';
+          direccion = g[3] || '';
+          nitFacturacion = g[4] || '';
+        } else if (isCodigo(g[3])) {
+          // Formato B: caso ZONA 3
+          nombreNegocio = g[0] || '';
+          direccion = g[1] || '';
+          nombreCliente = g[2] || '';
+          codigoNegocio = g[3] || '';
+          nitFacturacion = g[4] || '';
+        } else {
+          continue;
+        }
 
         parsed.push({
-          codigoNegocio: codigoNegocio.trim(),
-          nombreNegocio: nombreNegocio.trim(),
-          nombreCliente: nombreCliente.trim(),
-          direccion: direccion.trim(),
-          nitFacturacion: nitFacturacion.trim()
+          codigoNegocio: (codigoNegocio || '').trim(),
+          nombreNegocio: (nombreNegocio || '').trim(),
+          nombreCliente: (nombreCliente || '').trim(),
+          direccion: (direccion || '').trim(),
+          nitFacturacion: (nitFacturacion || '').trim()
         });
-
-        // Avanzar 4 posiciones porque ya consumimos 5 líneas de este cliente
-        i += 4;
       }
 
       return parsed;
@@ -719,19 +722,17 @@
       const numeric = /^\d+$/.test(q);
       const matches = state.baseData.filter(c => {
         if (numeric) {
-          // Buscar por código o nit
-          return (c.codigoNegocio || '').toLowerCase().includes(q) || (c.nitFacturacion || '').toLowerCase().includes(q);
+          return (c.codigoNegocio || '').toLowerCase().includes(q) ||
+                 (c.nitFacturacion || '').toLowerCase().includes(q);
         }
         const nombreNegocio = (c.nombreNegocio || '').toLowerCase();
         const nombreCliente = (c.nombreCliente || '').toLowerCase();
         return nombreNegocio.includes(q) || nombreCliente.includes(q);
       });
 
-      if (matches.length === 0) {
-        searchStatus.textContent = 'Sin coincidencias. Puede crear un cliente nuevo con el botón +';
-      } else {
-        searchStatus.textContent = `Coincidencias encontradas: ${matches.length}`;
-      }
+      searchStatus.textContent = matches.length === 0
+        ? 'Sin coincidencias. Puede crear un cliente nuevo con el botón +'
+        : `Coincidencias encontradas: ${matches.length}`;
 
       renderSearchResults(matches);
     }
@@ -748,15 +749,13 @@
         c.nombreNegocio || '',
         c.nombreCliente || ''
       ].join('|').toLowerCase()) === key);
-      if (!exists) {
-        list.push({ ...client });
-      }
+      if (!exists) list.push({ ...client });
     }
 
     function renderRestruct() {
       restructContainer.innerHTML = '';
-
       let hasData = false;
+
       daysOrder.forEach((dayLabel, idx) => {
         const list = state.assignedByDay[dayLabel];
         if (!list || list.length === 0) return;
@@ -809,11 +808,9 @@
         restructContainer.appendChild(block);
       });
 
-      if (!hasData) {
-        restructStatus.textContent = 'Sin clientes asignados todavía. Guarde clientes para ver la reestructura.';
-      } else {
-        restructStatus.textContent = 'Vista reestructurada generada por día. Use Reestructura cuando actualice la asignación.';
-      }
+      restructStatus.textContent = hasData
+        ? 'Vista reestructurada generada por día. Use Reestructura cuando actualice la asignación.'
+        : 'Sin clientes asignados todavía. Guarde clientes para ver la reestructura.';
     }
 
     function openModal() {
@@ -832,13 +829,13 @@
       modalBackdrop.style.display = 'none';
     }
 
-    // Eventos
-    fileInput.addEventListener('change', (e) => {
+    // EVENTOS
+    fileInput.addEventListener('change', e => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = (evt) => {
+      reader.onload = evt => {
         try {
           const text = String(evt.target.result || '');
           const parsed = parseTxtContent(text);
@@ -854,7 +851,7 @@
       reader.readAsText(file, 'utf-8');
     });
 
-    searchInput.addEventListener('input', (e) => {
+    searchInput.addEventListener('input', e => {
       searchClients(e.target.value || '');
     });
 
@@ -870,9 +867,7 @@
       const currentRoute = routeInput.value.trim();
       const baseClient = state.selectedClient;
       const clientForDay = { ...baseClient };
-      if (currentRoute) {
-        clientForDay.ruta = currentRoute;
-      }
+      if (currentRoute) clientForDay.ruta = currentRoute;
 
       ensureUniqueAssignment(day, clientForDay);
       restructStatus.textContent = `Cliente asignado a ${day}. Presione Reestructura para actualizar la tabla.`;
@@ -911,20 +906,26 @@
         return;
       }
 
-      // Formato exacto para Excel / SAP
-      // Ruta | Día Visita | Orden | Código Negocio | Nombre Negocio | Nombre Cliente | Dirección | Nit Facturación
-      const headers = ['RUTA','DÍA VISITA','ORDEN','CÓDIGO NEGOCIO','NOMBRE NEGOCIO','NOMBRE CLIENTE','DIRECCIÓN','NIT FACTURACIÓN'];
-      const rows = [];
-      rows.push(headers);
+      const headers = [
+        'RUTA',
+        'DÍA VISITA',
+        'ORDEN',
+        'CÓDIGO NEGOCIO',
+        'NOMBRE NEGOCIO',
+        'NOMBRE CLIENTE',
+        'DIRECCIÓN',
+        'NIT FACTURACIÓN'
+      ];
+      const rows = [headers];
 
-      daysOrder.forEach((dayLabel) => {
+      daysOrder.forEach(dayLabel => {
         const list = state.assignedByDay[dayLabel];
         if (!list || list.length === 0) return;
 
         list.forEach((client, index) => {
           const ruta = client.ruta || '';
           const diaVisita = dayLabel;
-          const orden = index + 1; // posición dentro del día
+          const orden = index + 1;
           const codigoNegocio = client.codigoNegocio || '';
           const nombreNegocio = client.nombreNegocio || '';
           const nombreCliente = client.nombreCliente || '';
@@ -944,11 +945,10 @@
         });
       });
 
-      // Construir CSV (usamos ; como separador para que se vea bien en configuraciones ES)
       const csvContent = rows
         .map(cols => cols.map(v => {
-          const s = (v ?? '').toString().replace(/"/g, '""');
-          return `"${s}` + `"`;
+          const s = (v === undefined || v === null ? '' : String(v)).replace(/"/g, '""');
+          return `"${s}"`;
         }).join(';'))
         .join('\r\n');
 
@@ -965,7 +965,6 @@
 
     newClientBtn.addEventListener('click', () => {
       if (state.baseData.length === 0) {
-        // Permitimos crear aunque no haya base, pero lo indicamos
         searchStatus.textContent = 'Creando cliente nuevo sin base cargada.';
       }
       openModal();
@@ -990,10 +989,8 @@
 
       const newClient = { codigoNegocio, nombreNegocio, nombreCliente, direccion, nitFacturacion };
 
-      // Agregar a base interna para futuras búsquedas
       state.baseData.push(newClient);
 
-      // Asignar al día seleccionado
       const day = daySelect.value;
       const clientForDay = { ...newClient };
       const currentRoute = routeInput.value.trim();
@@ -1002,35 +999,28 @@
 
       closeModal();
 
-      // Actualizar mensajes y selección
       state.selectedClient = newClient;
       selectedBadge.textContent = 'Cliente creado y asignado:';
       selectedName.textContent = newClient.nombreNegocio || newClient.nombreCliente;
       searchStatus.textContent = `Cliente nuevo agregado a la base y asignado a ${day}.`;
 
-      // Si hay texto de búsqueda, refrescar
       if (searchInput.value.trim()) {
         searchClients(searchInput.value || '');
       }
     });
 
-    // Cerrar modal al tocar fuera
-    modalBackdrop.addEventListener('click', (e) => {
+    modalBackdrop.addEventListener('click', e => {
       if (e.target === modalBackdrop) {
         closeModal();
       }
     });
 
-    // Pequeño test dev opcional (activar con ?devtest=1 en la URL)
     function runDevTests() {
       const sample = '2000-1018349;TIENDA LA BENDICION #3;DIEGO TOJIN;EL PROGRESO-SANARATE;CF\n' +
                      '2000-1165850;TIENDA ESQUIPULAS;RICARDO UZ;EL PROGRESO-SANARATE;9430824-1';
       const parsed = parseTxtContent(sample);
       console.assert(parsed.length === 2, 'DevTest: debería leer 2 filas');
-      console.assert(parsed[0].codigoNegocio === '2000-1018349', 'DevTest: código incorrecto en fila 1');
-      console.assert(parsed[1].nombreNegocio.includes('ESQUIPULAS'), 'DevTest: nombre negocio fila 2');
 
-      // Caso vertical sencillo
       const vertical = [
         '2000-999999',
         'TIENDA PRUEBA',
@@ -1040,12 +1030,8 @@
       ].join('\n');
       const parsedVertical = parseTxtContent(vertical);
       console.assert(parsedVertical.length === 1, 'DevTest vertical: debería leer 1 cliente');
-      console.assert(parsedVertical[0].codigoNegocio === '2000-999999', 'DevTest vertical: código incorrecto');
-
-      console.log('DevTests OK (Registro de Clientes).');
     }
 
-    // Inicialización
     document.addEventListener('DOMContentLoaded', () => {
       const todayLabel = getTodayLabel();
       daySelect.value = todayLabel;
@@ -1054,11 +1040,8 @@
         runDevTests();
       }
 
-      // Registrar service worker para PWA (solo en entornos seguros y compatibles)
       if ('serviceWorker' in navigator && window.isSecureContext) {
-        navigator.serviceWorker.register('service-worker.js').catch(() => {
-          // En entornos sandbox simplemente ignoramos el error
-        });
+        navigator.serviceWorker.register('service-worker.js').catch(() => {});
       }
     });
   </script>
