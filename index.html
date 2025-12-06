@@ -600,15 +600,14 @@
     // Espera archivos con columnas en este orden:
     // Código Negocio; Nombre Negocio; Nombre Cliente; Dirección; Nit Facturación
     function parseTxtContent(text) {
-      const rawLines = text.split(/
-?
-/);
+      // FIX: regex bien formado para dividir por saltos de línea
+      const rawLines = text.split(/\r?\n/);
       const trimmed = rawLines.map(l => l.trim());
 
       const parsed = [];
 
       // ¿Viene en una sola línea con separadores (CSV / TXT plano)?
-      const hasDelimiters = rawLines.some(l => /[;	,|]/.test(l));
+      const hasDelimiters = rawLines.some(l => /[;\t,|]/.test(l));
 
       if (hasDelimiters) {
         // Modo 1: cada CLIENTE está en UNA LÍNEA, separado por ; , tab o |
@@ -616,8 +615,8 @@
 
         for (const line of lines) {
           let parts;
-          if (line.includes('	')) {
-            parts = line.split('	');
+          if (line.includes('\t')) {
+            parts = line.split('\t');
           } else if (line.includes(';')) {
             parts = line.split(';');
           } else if (line.includes('|')) {
@@ -949,7 +948,7 @@
       const csvContent = rows
         .map(cols => cols.map(v => {
           const s = (v ?? '').toString().replace(/"/g, '""');
-          return `"${s}"`;
+          return `"${s}` + `"`;
         }).join(';'))
         .join('\r\n');
 
@@ -1030,6 +1029,19 @@
       console.assert(parsed.length === 2, 'DevTest: debería leer 2 filas');
       console.assert(parsed[0].codigoNegocio === '2000-1018349', 'DevTest: código incorrecto en fila 1');
       console.assert(parsed[1].nombreNegocio.includes('ESQUIPULAS'), 'DevTest: nombre negocio fila 2');
+
+      // Caso vertical sencillo
+      const vertical = [
+        '2000-999999',
+        'TIENDA PRUEBA',
+        'CLIENTE PRUEBA',
+        'DIRECCION X',
+        'CF'
+      ].join('\n');
+      const parsedVertical = parseTxtContent(vertical);
+      console.assert(parsedVertical.length === 1, 'DevTest vertical: debería leer 1 cliente');
+      console.assert(parsedVertical[0].codigoNegocio === '2000-999999', 'DevTest vertical: código incorrecto');
+
       console.log('DevTests OK (Registro de Clientes).');
     }
 
