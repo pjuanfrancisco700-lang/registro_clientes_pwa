@@ -442,6 +442,7 @@
   <span class="pill">REGISTRO DE CLIENTES 2</span>
   <h1>Registro de Clientes</h1>
 
+  <!-- CARD RUTA / DÍA -->
   <div class="card">
     <div class="card-header">
       <span class="card-title">Datos de visita</span>
@@ -480,6 +481,7 @@
     </div>
   </div>
 
+  <!-- CARD BUSCAR / GUARDAR -->
   <div class="card">
     <div class="card-header">
       <span class="card-title">Selección de cliente</span>
@@ -496,13 +498,15 @@
     <div id="suggestions" class="suggestions" style="display:none;"></div>
 
     <div class="helper-text">
-      Cargue una base de datos <strong>.txt</strong> para comenzar.  
-      Formato: Código Negocio, Nombre Negocio, Nombre Cliente, Dirección, Nit (separado por tab).
+      Cargue una base de datos <strong>.txt</strong> para comenzar.<br>
+      Formato esperado (vertical, como tu archivo de ruta 17029):<br>
+      <em>Cada cliente ocupa 5 líneas: Código, Nombre del negocio, Nombre del cliente, Dirección, Nit (CF).</em>.
     </div>
 
     <div id="estadoSeleccion" class="status-text">
       Ningún cliente seleccionado.
-    </div>    <div id="estadoCarga" class="status-text"></div>
+    </div>
+    <div id="estadoCarga" class="status-text"></div>
     <div id="estadoError" class="status-text status-error"></div>
 
     <div class="bottom-actions">
@@ -510,6 +514,7 @@
     </div>
   </div>
 
+  <!-- CARD TABLA REESTRUCTURADA -->
   <div class="card">
     <div class="card-header">
       <span class="card-title">Tabla reestructurada</span>
@@ -539,8 +544,10 @@
   </div>
 </div>
 
+<!-- INPUT OCULTO PARA TXT -->
 <input type="file" id="fileInput" accept=".txt" style="display:none;" />
 
+<!-- MODAL NUEVO CLIENTE -->
 <div class="modal-backdrop" id="modalNuevo">
   <div class="modal">
     <div class="modal-header">
@@ -589,14 +596,25 @@
 </div>
 
 <script>
+  // ============================
+  // ESTADO GLOBAL
+  // ============================
   let baseClientes = [];
   let clienteSeleccionado = null;
   let registrosGuardados = [];
   const STORAGE_KEY = "registroClientes2_registros";
   const STORAGE_BASE = "registroClientes2_base";
 
+  // ============================
+  // UTILIDADES
+  // ============================
   function normalizarTexto(t) {
-    return (t || "").toString().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    // Quita acentos y pasa a minúsculas
+    return (t || "")
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
   }
 
   function cargarDesdeLocalStorage() {
@@ -648,40 +666,61 @@
     `;
   }
 
+  // ============================
+  // PARSEO DEL TXT
+  // ============================
   function parsearTxtClientes(text) {
-    const lineas = text.split(/
-?
-/).map(l => l.trim()).filter(l => l.length > 0);
-    if (lineas.length === 0) return [];
+    // Tu TXT viene en formato VERTICAL de 5 líneas por cliente:
+    // 1: Código
+    // 2: Nombre negocio
+    // 3: Nombre cliente / propietario
+    // 4: Dirección
+    // 5: Nit (CF si no hay)
 
-    let inicio = 0;
-    const primera = lineas[0].toLowerCase();
-    if (primera.includes("codigo") && primera.includes("negocio")) {
-      inicio = 1;
-    }
+    // 1) Separar por saltos de línea (Windows / Unix / Mac)
+    const rawLines = text
+      .split(/
+?
+/)
+      .map(l => l.trim());
+
+    // 2) Quitar líneas vacías
+    const lineas = rawLines.filter(l => l.length > 0);
+
+    console.log("[DEBUG] Líneas no vacías en TXT:", lineas.length);
+    if (lineas.length < 5) return [];
 
     const clientes = [];
-    for (let i = inicio; i < lineas.length; i++) {
-      const partes = lineas[i].split(/	|;/);
-      if (partes.length < 4) continue;
-      const codigo = partes[0]?.trim();
-      const nombreNegocio = partes[1]?.trim();
-      const nombreCliente = partes[2]?.trim() || "";
-      const direccion = partes[3]?.trim() || "";
-      const nit = (partes[4]?.trim() || "CF").toUpperCase();
-      if (!codigo || !nombreNegocio) continue;
+
+    // Recorremos de 5 en 5 (cada 5 líneas es un cliente)
+    for (let i = 0; i + 4 < lineas.length; i += 5) {
+      const codigo        = lineas[i] || "";
+      const nombreNegocio = lineas[i + 1] || "";
+      const nombreCliente = lineas[i + 2] || "";
+      const direccion     = lineas[i + 3] || "";
+      const nit           = (lineas[i + 4] || "CF").toUpperCase();
+
+      // Validación mínima: código y nombre de negocio
+      if (!codigo || !nombreNegocio) {
+        continue;
+      }
 
       clientes.push({
-        codigo,
-        nombreNegocio,
-        nombreCliente,
-        direccion,
-        nit
+        codigo: codigo.trim(),
+        nombreNegocio: nombreNegocio.trim(),
+        nombreCliente: nombreCliente.trim(),
+        direccion: direccion.trim(),
+        nit: nit.trim() || "CF",
       });
     }
+
+    console.log("[DEBUG] Clientes reconocidos:", clientes.length);
     return clientes;
   }
 
+  // ============================
+  // SUGERENCIAS DE BÚSQUEDA
+  // ============================
   function actualizarSugerencias() {
     const q = normalizarTexto(document.getElementById("buscador").value);
     const cont = document.getElementById("suggestions");
@@ -690,12 +729,14 @@
       cont.style.display = "none";
       return;
     }
-    const resultados = baseClientes.filter(c => {
-      const nc = normalizarTexto(c.codigo);
-      const nn = normalizarTexto(c.nombreNegocio);
-      const np = normalizarTexto(c.nombreCliente);
-      return nc.includes(q) || nn.includes(q) || np.includes(q);
-    }).slice(0, 30);
+    const resultados = baseClientes
+      .filter(c => {
+        const nc = normalizarTexto(c.codigo);
+        const nn = normalizarTexto(c.nombreNegocio);
+        const np = normalizarTexto(c.nombreCliente);
+        return nc.includes(q) || nn.includes(q) || np.includes(q);
+      })
+      .slice(0, 30);
 
     if (resultados.length === 0) {
       cont.style.display = "none";
@@ -719,11 +760,16 @@
     cont.style.display = "block";
   }
 
+  // ============================
+  // TABLA REESTRUCTURADA
+  // ============================
   function construirTabla() {
     const wrapper = document.getElementById("tablaWrapper");
     const ruta = document.getElementById("ruta").value.trim();
     const dia = document.getElementById("dia").value;
-    const soloGuardados = document.getElementById("toggleSoloGuardados").classList.contains("active");
+    const soloGuardados = document
+      .getElementById("toggleSoloGuardados")
+      .classList.contains("active");
 
     let datos = [...registrosGuardados];
 
@@ -732,7 +778,8 @@
     }
 
     if (datos.length === 0) {
-      wrapper.innerHTML = '<div class="no-data">Sin datos reestructurados para la ruta y día actuales.</div>';
+      wrapper.innerHTML =
+        '<div class="no-data">Sin datos reestructurados para la ruta y día actuales.</div>';
       return;
     }
 
@@ -775,10 +822,15 @@
     wrapper.innerHTML = html;
   }
 
+  // ============================
+  // EXPORTAR EXCEL (TSV)
+  // ============================
   function descargarExcel() {
     const ruta = document.getElementById("ruta").value.trim();
     const dia = document.getElementById("dia").value;
-    let datos = registrosGuardados.filter(r => r.ruta === ruta && r.diaVisita === dia);
+    let datos = registrosGuardados.filter(
+      r => r.ruta === ruta && r.diaVisita === dia
+    );
 
     if (datos.length === 0) {
       alert("No hay datos para exportar en la ruta y día actuales.");
@@ -814,11 +866,12 @@
     });
 
     const tsv = filas
-      .map(row => row.map(v => `"${(v || "").toString().replace(/"/g, '""')}"`).join("	"))
-      .join("
-");
+      .map(row => row.map(v => `"${(v || "").toString().replace(/"/g, '""')}"`).join("\t"))
+      .join("\r\n");
 
-    const blob = new Blob([tsv], { type: "text/tab-separated-values;charset=utf-8;" });
+    const blob = new Blob([tsv], {
+      type: "text/tab-separated-values;charset=utf-8;"
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -829,6 +882,9 @@
     URL.revokeObjectURL(url);
   }
 
+  // ============================
+  // GUARDAR REGISTRO
+  // ============================
   function guardarRegistro() {
     mostrarError("");
     const ruta = document.getElementById("ruta").value.trim();
@@ -843,7 +899,9 @@
       return;
     }
 
-    const existentes = registrosGuardados.filter(r => r.ruta === ruta && r.diaVisita === dia);
+    const existentes = registrosGuardados.filter(
+      r => r.ruta === ruta && r.diaVisita === dia
+    );
     const orden = existentes.length + 1;
 
     const registro = {
@@ -867,6 +925,9 @@
     actualizarEstadoSeleccion();
   }
 
+  // ============================
+  // MODAL NUEVO CLIENTE
+  // ============================
   function abrirModalNuevo() {
     document.getElementById("modalNuevo").style.display = "flex";
     document.getElementById("modalError").textContent = "";
@@ -883,9 +944,15 @@
 
   function guardarNuevoCliente() {
     const codigo = document.getElementById("nuevoCodigo").value.trim();
-    const nombreNegocio = document.getElementById("nuevoNombreNegocio").value.trim();
-    const nombreCliente = document.getElementById("nuevoNombreCliente").value.trim();
-    const direccion = document.getElementById("nuevoDireccion").value.trim();
+    const nombreNegocio = document
+      .getElementById("nuevoNombreNegocio")
+      .value.trim();
+    const nombreCliente = document
+      .getElementById("nuevoNombreCliente")
+      .value.trim();
+    const direccion = document
+      .getElementById("nuevoDireccion")
+      .value.trim();
     const nit = (document.getElementById("nuevoNit").value.trim() || "CF").toUpperCase();
     const errEl = document.getElementById("modalError");
 
@@ -910,6 +977,9 @@
     cerrarModalNuevo();
   }
 
+  // ============================
+  // LIMPIAR REGISTROS
+  // ============================
   function limpiarRegistros() {
     if (!confirm("¿Borrar todos los registros guardados en este dispositivo?")) return;
     registrosGuardados = [];
@@ -917,63 +987,134 @@
     construirTabla();
   }
 
+  // ============================
+  // TESTS BÁSICOS (CONSOLE)
+  // ============================
+  function runTests() {
+    console.group("Tests RegistroClientes2");
+
+    // Test 1: un cliente en formato vertical 5 líneas
+    const txt1 = [
+      "2000-1018349",
+      "TIENDA LA BENDICION #3",
+      "DIEGO TOJIN",
+      "EL PROGRESO-SANARATE, 5 AVENIDA ZONA 2",
+      "CF"
+    ].join("
+");
+    const r1 = parsearTxtClientes(txt1);
+    console.assert(r1.length === 1, "Test1: debería haber 1 cliente");
+    console.assert(r1[0].codigo === "2000-1018349", "Test1: código coincide");
+    console.assert(r1[0].nit === "CF", "Test1: nit coincide");
+
+    // Test 2: dos clientes seguidos (10 líneas)
+    const txt2 = [
+      "2000-1165850",
+      "TIENDA ESQUIPULAS",
+      "RICARDO UZ",
+      "EL PROGRESO-SANARATE, 3 AVENIDA 1-003 ZONA 1",
+      "9430824-1",
+      "2000-1191342",
+      "TIENDA LA BENDICION DE DIOS EL CIELITO",
+      "GASPAR TIU",
+      "SANARATE, ZONA 2, 05 CL. 8071, SANARATE, EL PROGRESO",
+      "8345398-9"
+    ].join("
+");
+    const r2 = parsearTxtClientes(txt2);
+    console.assert(r2.length === 2, "Test2: debería haber 2 clientes");
+    console.assert(r2[1].codigo === "2000-1191342", "Test2: código segundo cliente");
+
+    console.groupEnd();
+  }
+
+  // ============================
+  // INICIALIZACIÓN
+  // ============================
   window.addEventListener("DOMContentLoaded", () => {
     cargarDesdeLocalStorage();
     actualizarEstadoSeleccion();
     construirTabla();
+    runTests(); // Ejecuta tests al cargar (solo consola)
 
-    document.getElementById("buscador").addEventListener("input", actualizarSugerencias);
-    document.getElementById("btnGuardar").addEventListener("click", guardarRegistro);
-    document.getElementById("btnReestructura").addEventListener("click", construirTabla);
-    document.getElementById("btnExcel").addEventListener("click", descargarExcel);
+    document
+      .getElementById("buscador")
+      .addEventListener("input", actualizarSugerencias);
+    document
+      .getElementById("btnGuardar")
+      .addEventListener("click", guardarRegistro);
+    document
+      .getElementById("btnReestructura")
+      .addEventListener("click", construirTabla);
+    document
+      .getElementById("btnExcel")
+      .addEventListener("click", descargarExcel);
 
-    document.getElementById("rutaInputShell").addEventListener("click", (e) => {
-      const isIcon = e.target.closest(".icon-folder");
-      if (isIcon) {
-        document.getElementById("fileInput").click();
-      }
-    });
-
-    document.getElementById("fileInput").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        try {
-          const contenido = evt.target.result;
-          const clientes = parsearTxtClientes(contenido);
-          if (clientes.length === 0) {
-            mostrarError("No se reconocieron clientes en el archivo .txt.");
-            return;
-          }
-          baseClientes = clientes;
-          guardarEnLocalStorage();
-          actualizarEstadoCarga();
-          mostrarError("");
-        } catch (err) {
-          console.error(err);
-          mostrarError("Error al leer el archivo .txt.");
+    document
+      .getElementById("rutaInputShell")
+      .addEventListener("click", e => {
+        const isIcon = e.target.closest(".icon-folder");
+        if (isIcon) {
+          document.getElementById("fileInput").click();
         }
-      };
-      reader.readAsText(file, "utf-8");
-    });
+      });
 
-    document.getElementById("toggleSoloGuardados").addEventListener("click", () => {
-      const t = document.getElementById("toggleSoloGuardados");
-      t.classList.toggle("active");
-      construirTabla();
-    });
+    document
+      .getElementById("fileInput")
+      .addEventListener("change", e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = evt => {
+          try {
+            const contenido = evt.target.result;
+            const clientes = parsearTxtClientes(contenido);
+            if (clientes.length === 0) {
+              mostrarError("No se reconocieron clientes en el archivo .txt.");
+              return;
+            }
+            baseClientes = clientes;
+            guardarEnLocalStorage();
+            actualizarEstadoCarga();
+            mostrarError("");
+          } catch (err) {
+            console.error(err);
+            mostrarError("Error al leer el archivo .txt.");
+          }
+        };
+        reader.readAsText(file, "utf-8");
+      });
 
-    document.getElementById("btnLimpiarTodo").addEventListener("click", limpiarRegistros);
+    document
+      .getElementById("toggleSoloGuardados")
+      .addEventListener("click", () => {
+        const t = document.getElementById("toggleSoloGuardados");
+        t.classList.toggle("active");
+        construirTabla();
+      });
 
-    document.getElementById("btnNuevo").addEventListener("click", abrirModalNuevo);
-    document.getElementById("modalCerrar").addEventListener("click", cerrarModalNuevo);
-    document.getElementById("modalCancelar").addEventListener("click", cerrarModalNuevo);
-    document.getElementById("modalGuardar").addEventListener("click", guardarNuevoCliente);
+    document
+      .getElementById("btnLimpiarTodo")
+      .addEventListener("click", limpiarRegistros);
 
-    document.getElementById("modalNuevo").addEventListener("click", (e) => {
-      if (e.target.id === "modalNuevo") cerrarModalNuevo();
-    });
+    document
+      .getElementById("btnNuevo")
+      .addEventListener("click", abrirModalNuevo);
+    document
+      .getElementById("modalCerrar")
+      .addEventListener("click", cerrarModalNuevo);
+    document
+      .getElementById("modalCancelar")
+      .addEventListener("click", cerrarModalNuevo);
+    document
+      .getElementById("modalGuardar")
+      .addEventListener("click", guardarNuevoCliente);
+
+    document
+      .getElementById("modalNuevo")
+      .addEventListener("click", e => {
+        if (e.target.id === "modalNuevo") cerrarModalNuevo();
+      });
   });
 </script>
 </body>
