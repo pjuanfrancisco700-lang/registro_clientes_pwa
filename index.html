@@ -3,25 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-  <title>Registro de Clientes</title>
-
-  <!-- PWA manifest & icons -->
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
-  <meta name="theme-color" content="#0F5C9A">
-
+  <title>Registro de Clientes 2</title>
   <style>
     :root {
-      --bg: #E5E7EB;          /* gris neutro de fondo */
-      --card: #FFFFFF;        /* tarjetas blancas tipo Fiori */
-      --accent: #0F5C9A;      /* azul corporativo estilo SAP */
-      --accent-soft: #E3ECF5; /* azul muy suave para fondos */
-      --border: #D1D5DB;      /* borde gris claro */
-      --text-main: #111827;   /* texto principal */
-      --text-soft: #6B7280;   /* texto secundario */
-      --danger: #B91C1C;      /* mensajes de error */
+      --bg: #E5E7EB;
+      --card: #FFFFFF;
+      --accent: #0F5C9A;
+      --accent-soft: #E3ECF5;
+      --border: #D1D5DB;
+      --text-main: #111827;
+      --text-soft: #6B7280;
+      --danger: #B91C1C;
     }
 
     * {
@@ -31,1019 +23,978 @@
 
     body {
       margin: 0;
-      padding: 16px 12px;
+      padding: 16px;
       background: var(--bg);
       color: var(--text-main);
-      display: flex;
-      justify-content: center;
     }
 
     .app-shell {
-      width: 100%;
-      max-width: 430px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      max-width: 420px;
+      margin: 0 auto 64px;
     }
 
-    .top-bar {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
-      border: 1px solid var(--border);
-    }
-
-    .icon-button {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #F3F4F6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.05s, box-shadow 0.15s;
-    }
-
-    .icon-button:active {
-      transform: scale(0.97);
-      background: #E5E7EB;
-      box-shadow: inset 0 0 0 1px var(--border);
-    }
-
-    .field-label {
-      font-size: 11px;
+    h1 {
+      font-size: 20px;
       font-weight: 600;
-      text-transform: uppercase;
-      color: var(--text-soft);
-      margin-bottom: 4px;
+      margin: 0 0 12px;
+      color: var(--text-main);
     }
 
-    .input-sm {
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      font-size: 13px;
-      outline: none;
-      width: 96px;
-      background: #F9FAFB;
-    }
-
-    .input-sm:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent-soft);
-    }
-
-    .route-group {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 12px;
     }
 
     .card {
       background: var(--card);
-      border-radius: 16px;
-      padding: 14px 16px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 18px rgba(15, 76, 129, 0.08);
+      margin-bottom: 14px;
     }
 
-    .row {
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+
+    .field-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-soft);
+      font-weight: 600;
+    }
+
+    .input-shell {
       display: flex;
       align-items: center;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #F9FAFB;
+      padding: 0 12px;
+      height: 44px;
       gap: 8px;
     }
 
-    .row.space-between {
-      justify-content: space-between;
-    }
-
-    .select {
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      font-size: 14px;
-      outline: none;
-      flex: 1;
-      background: #F9FAFB;
-    }
-
-    .select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent-soft);
-    }
-
-    .search-input {
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      padding: 10px 12px;
-      font-size: 14px;
-      outline: none;
-      flex: 1;
-      background: #F9FAFB;
-    }
-
-    .search-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent-soft);
-    }
-
-    .pill-button {
-      border-radius: 10px;
+    .input-shell input,
+    .input-shell select {
       border: none;
-      padding: 10px 14px;
+      outline: none;
+      background: transparent;
+      flex: 1;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .input-shell select {
+      -webkit-appearance: none;
+      appearance: none;
+      padding-right: 18px;
+    }
+
+    .icon-folder {
+      width: 26px;
+      height: 26px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #FBBF24, #F97316);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .chevron {
       font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .search-input-shell {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #F9FAFB;
+      padding: 0 12px;
+      height: 46px;
+      gap: 8px;
+    }
+
+    .search-input-shell input {
+      border: none;
+      outline: none;
+      background: transparent;
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .search-input-shell .search-icon {
+      font-size: 16px;
+      color: var(--text-soft);
+    }
+
+    .btn {
+      border-radius: 12px;
+      border: none;
+      padding: 0 16px;
+      height: 44px;
+      font-size: 14px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      background: var(--accent);
-      color: #FFF;
-      cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      min-height: 40px;
-      width: 100%;
-      transition: background 0.15s, transform 0.05s, box-shadow 0.15s;
-      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
-    }
-
-    .pill-button.secondary {
-      background: #F3F4F6;
-      color: var(--text-main);
-      box-shadow: none;
-      border: 1px solid var(--border);
-    }
-
-    .pill-button.full {
-      width: 100%;
-      justify-content: center;
-    }
-
-    .pill-button:active {
-      transform: translateY(1px);
-      background: #0B4A7A;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2);
-    }
-
-    .pill-button.secondary:active {
-      background: #E5E7EB;
-      box-shadow: inset 0 0 0 1px var(--border);
-    }
-
-    .results-list {
-      max-height: 150px;
-      overflow-y: auto;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #F9FAFB;
-    }
-
-    .result-item {
-      padding: 6px 8px;
-      border-bottom: 1px solid #E5E7EB;
-      font-size: 13px;
       cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+      transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.15s ease;
+      white-space: nowrap;
     }
 
-    .result-item:last-child {
-      border-bottom: none;
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+      box-shadow: 0 6px 14px rgba(15, 92, 154, 0.25);
     }
 
-    .result-item:hover {
-      background: #E5EDF7;
+    .btn-primary:active {
+      transform: translateY(1px);
+      box-shadow: 0 3px 7px rgba(15, 92, 154, 0.2);
     }
 
-    .result-name {
-      font-weight: 600;
+    .btn-secondary {
+      background: #EEF0F4;
+      color: var(--text-main);
     }
 
-    .result-meta {
+    .btn-icon {
+      width: 44px;
+      padding: 0;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 22px;
+      box-shadow: 0 5px 10px rgba(15, 92, 154, 0.25);
+    }
+
+    .helper-text {
       font-size: 11px;
       color: var(--text-soft);
-    }
-
-    .selected-badge {
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
-    .selected-name {
-      font-size: 13px;
-      font-weight: 600;
+      margin-top: 4px;
     }
 
     .status-text {
-      font-size: 11px;
+      font-size: 12px;
+      margin-top: 6px;
       color: var(--text-soft);
     }
 
-    .status-text.error {
+    .status-text strong {
+      color: var(--text-main);
+    }
+
+    .status-error {
       color: var(--danger);
     }
 
-    .restruct-card {
-      margin-top: 2px;
+    .status-ok {
+      color: #047857;
     }
 
-    .day-block {
-      margin-top: 10px;
+    .bottom-actions {
+      margin-top: 12px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .toggle-shell {
+      width: 56px;
+      height: 30px;
+      border-radius: 999px;
+      background: #E5E7EB;
+      display: flex;
+      align-items: center;
+      padding: 3px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .toggle-shell.active {
+      background: var(--accent);
+    }
+
+    .toggle-knob {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transform: translateX(0);
+      transition: transform 0.15s ease;
+    }
+
+    .toggle-shell.active .toggle-knob {
+      transform: translateX(24px);
+    }
+
+    .icon-trash {
+      width: 34px;
+      height: 34px;
       border-radius: 10px;
       border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--text-soft);
       background: #F9FAFB;
-      overflow: hidden;
+      cursor: pointer;
     }
 
-    .day-header {
-      padding: 6px 8px;
-      background: var(--accent-soft);
-      font-size: 11px;
+    .bottom-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .bottom-buttons .btn {
+      flex: 1;
+      height: 44px;
+    }
+
+    .btn-ghost {
+      background: #F9FAFB;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 13px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--accent);
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
+      color: var(--text-main);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      margin-top: 10px;
+      font-size: 11px;
     }
 
-    th, td {
-      padding: 6px 8px;
-      border-bottom: 1px solid #E5E7EB;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      background: #F3F4F6;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #374151;
-    }
-
-    tr:nth-child(even) td {
-      background: #F9FAFB;
-    }
-
-    tr:nth-child(odd) td {
-      background: #FFFFFF;
-    }
-
-    .footer-space {
-      height: 10px;
-    }
-
-    .restruct-button {
-      margin-top: 2px;
-    }
-
-    .toggle-switch {
-      width: 32px;
-      height: 16px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #F3F4F6;
-      padding: 2px;
-      display: flex;
-      align-items: center;
-      transition: background 0.15s;
-    }
-
-    .toggle-knob {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: #4B5563;
-      transition: transform 0.15s, background 0.15s;
-    }
-
-    .toggle-switch.on {
+    thead {
       background: var(--accent-soft);
     }
 
-    .toggle-switch.on .toggle-knob {
-      transform: translateX(14px);
-      background: var(--accent);
+    th, td {
+      padding: 6px 4px;
+      text-align: left;
     }
 
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.38);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-    }
-
-    .modal {
-      background: var(--card);
-      border-radius: 18px;
-      padding: 16px 18px 14px;
-      width: 92%;
-      max-width: 430px;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .modal-title {
-      font-size: 14px;
+    th {
       font-weight: 600;
+      color: var(--text-soft);
+      border-bottom: 1px solid var(--border);
     }
 
-    .modal-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 4px;
-    }
-
-    .modal-input {
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      padding: 9px 10px;
-      font-size: 14px;
-      outline: none;
-      width: 100%;
+    tbody tr:nth-child(even) {
       background: #F9FAFB;
     }
 
-    .modal-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent-soft);
+    .no-data {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 8px;
+    }
+
+    /* Lista de sugerencias */
+    .suggestions {
+      margin-top: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #FFFFFF;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+
+    .suggestions-item {
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .suggestions-item:hover {
+      background: #EEF2FF;
+    }
+
+    .badge-selected {
+      display: inline-flex;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    /* Modal nuevo cliente */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+    }
+
+    .modal {
+      background: #FFFFFF;
+      border-radius: 18px;
+      padding: 16px 18px 14px;
+      width: min(420px, 92vw);
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.35);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      border: none;
+      background: transparent;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-soft);
     }
 
     .modal-actions {
       display: flex;
-      justify-content: flex-end;
-      gap: 6px;
-      margin-top: 4px;
+      gap: 8px;
+      margin-top: 12px;
     }
 
-    .chip-day {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
+    .modal-actions .btn {
+      flex: 1;
+      height: 40px;
+      font-size: 13px;
     }
 
-    .hidden-input {
-      display: none;
+    @media (max-width: 480px) {
+      body {
+        padding: 12px;
+      }
+      .card {
+        padding: 13px 14px;
+      }
+      .bottom-buttons {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="top-bar">
-      <label class="icon-button" title="Cargar base de datos (.txt)">
-        📁
-        <input id="fileInput" type="file" accept=".txt" class="hidden-input" />
-      </label>
+<div class="app-shell">
+  <span class="pill">REGISTRO DE CLIENTES 2</span>
+  <h1>Registro de Clientes</h1>
 
-      <div class="row" style="flex:1; gap:12px;">
-        <div class="route-group" style="flex:1;">
-          <span class="field-label">Ruta</span>
-          <input id="routeInput" type="text" class="input-sm" placeholder="17029" style="width:100%;"/>
+  <!-- CARD RUTA / DÍA -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Datos de visita</span>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">Ruta</label>
+        <div class="input-shell" id="rutaInputShell">
+          <div class="icon-folder" title="Cargar base .txt">
+            📁
+          </div>
+          <input id="ruta" type="number" value="17029" min="0" />
         </div>
-
-        <div style="flex:1;">
-          <span class="field-label">Día</span>
-          <select id="daySelect" class="select" style="width:100%;">
+        <div class="helper-text">
+          La ruta se usará en todos los clientes guardados.
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Día</label>
+        <div class="input-shell">
+          <select id="dia">
             <option value="Lunes">Lunes</option>
             <option value="Martes">Martes</option>
             <option value="Miércoles">Miércoles</option>
             <option value="Jueves">Jueves</option>
-            <option value="Viernes">Viernes</option>
+            <option value="Viernes" selected>Viernes</option>
             <option value="Sábado">Sábado</option>
+            <option value="Domingo">Domingo</option>
           </select>
+          <span class="chevron">▾</span>
         </div>
-      </div>
-    </header>
-
-    <section class="card">
-      <div class="field-label" style="display:none;">Buscar cliente</div>
-      <div class="row">
-        <input id="searchInput" type="text" class="search-input" placeholder="Buscar por código, negocio o cliente" />
-        <button id="newClientBtn" class="icon-button" title="Nuevo cliente">
-          +
-        </button>
-      </div>
-      <div id="searchStatus" class="status-text">Cargue una base de datos .txt para comenzar.</div>
-      <div id="results" class="results-list" style="display:none;"></div>
-      <div id="selectionInfo" class="row space-between" style="margin-top:4px;">
-        <div>
-          <div class="selected-badge" id="selectedBadge">Ningún cliente seleccionado.</div>
-          <div class="selected-name" id="selectedName"></div>
+        <div class="helper-text">
+          Día de visita para la reestructura.
         </div>
-        <button id="saveBtn" class="pill-button" style="min-width:96px;">
-          GUARDAR
-        </button>
-      </div>
-    </section>
-
-    <section class="card restruct-card">
-      <div class="row space-between" style="align-items:center;">
-        <div>
-          <div class="field-label">Tabla reestructurada</div>
-          <div class="status-text" id="restructStatus">Presione Reestructura para generar la vista organizada por día.</div>
-        </div>
-      </div>
-      <div class="row" style="gap:6px; margin-top:4px;">
-        <button id="toggleRestructBtn" class="icon-button" title="Ocultar/mostrar tabla">
-          <span id="toggleVisual" class="toggle-switch on">
-            <span class="toggle-knob"></span>
-          </span>
-        </button>
-        <button id="clearBtn" class="icon-button" title="Limpiar asignaciones">🗑️</button>
-        <button id="excelBtn" class="pill-button secondary" style="padding:4px 10px;font-size:11px;">EXCEL</button>
-        <button id="restructBtn" class="pill-button full restruct-button">Reestructura</button>
-      </div>
-      <div id="restructContainer"></div>
-    </section>
-
-    <div class="footer-space"></div>
-  </div>
-
-  <div id="modalBackdrop" class="modal-backdrop">
-    <div class="modal">
-      <div class="modal-title">Nuevo cliente</div>
-      <div class="status-text" id="modalDayInfo"></div>
-      <div class="modal-grid">
-        <div>
-          <div class="field-label">Ruta</div>
-          <input id="modalRuta" type="text" class="modal-input" />
-        </div>
-        <div>
-          <div class="field-label">Código negocio</div>
-          <input id="modalCodigoNegocio" type="text" class="modal-input" />
-        </div>
-        <div>
-          <div class="field-label">Nombre negocio</div>
-          <input id="modalNombreNegocio" type="text" class="modal-input" />
-        </div>
-        <div>
-          <div class="field-label">Nombre cliente</div>
-          <input id="modalNombreCliente" type="text" class="modal-input" />
-        </div>
-        <div>
-          <div class="field-label">Dirección</div>
-          <input id="modalDireccion" type="text" class="modal-input" />
-        </div>
-        <div>
-          <div class="field-label">Nit facturación</div>
-          <input id="modalNit" type="text" class="modal-input" />
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button id="cancelModalBtn" class="pill-button secondary">Cancelar</button>
-        <button id="saveModalBtn" class="pill-button">Guardar</button>
       </div>
     </div>
   </div>
 
-  <script>
-    const state = {
-      baseData: [],
-      assignedByDay: {
-        'Lunes': [],
-        'Martes': [],
-        'Miércoles': [],
-        'Jueves': [],
-        'Viernes': [],
-        'Sábado': []
-      },
-      selectedClient: null
+  <!-- CARD BUSCAR / GUARDAR -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Selección de cliente</span>
+    </div>
+
+    <div class="search-row">
+      <div class="search-input-shell">
+        <span class="search-icon">🔍</span>
+        <input id="buscador" type="text" placeholder="Buscar por código, negocio o cliente" autocomplete="off" />
+      </div>
+      <button class="btn btn-icon" id="btnNuevo" title="Crear cliente nuevo">+</button>
+    </div>
+
+    <div id="suggestions" class="suggestions" style="display:none;"></div>
+
+    <div class="helper-text">
+      Cargue una base de datos <strong>.txt</strong> para comenzar.  
+      Formato: Código Negocio, Nombre Negocio, Nombre Cliente, Dirección, Nit (separado por tab).
+    </div>
+
+    <div id="estadoSeleccion" class="status-text">
+      Ningún cliente seleccionado.
+    </div>
+    <div id="estadoCarga" class="status-text"></div>
+    <div id="estadoError" class="status-text status-error"></div>
+
+    <div class="bottom-actions">
+      <button class="btn btn-primary" id="btnGuardar">GUARDAR</button>
+    </div>
+  </div>
+
+  <!-- CARD TABLA REESTRUCTURADA -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Tabla reestructurada</span>
+    </div>
+    <div class="helper-text">
+      Presione <strong>Reestructura</strong> para ver los clientes organizados por día y orden de visita.
+    </div>
+
+    <div class="toggle-row">
+      <div id="toggleSoloGuardados" class="toggle-shell active">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="helper-text">Mostrar solo clientes guardados.</span>
+      <div id="btnLimpiarTodo" class="icon-trash" title="Borrar todos los registros guardados">
+        🗑
+      </div>
+    </div>
+
+    <div class="bottom-buttons">
+      <button class="btn btn-ghost" id="btnExcel">EXCEL</button>
+      <button class="btn btn-primary" id="btnReestructura">REESTRUCTURA</button>
+    </div>
+
+    <div id="tablaWrapper">
+      <div class="no-data">Sin datos reestructurados todavía.</div>
+    </div>
+  </div>
+</div>
+
+<!-- input oculto para TXT -->
+<input type="file" id="fileInput" accept=".txt" style="display:none;" />
+
+<!-- MODAL NUEVO CLIENTE -->
+<div class="modal-backdrop" id="modalNuevo">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nuevo cliente</div>
+      <button class="modal-close" id="modalCerrar">&times;</button>
+    </div>
+    <div class="helper-text">
+      Los datos del nuevo cliente se guardarán también en la base local de la app.
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label class="field-label">Código Negocio</label>
+      <div class="input-shell">
+        <input id="nuevoCodigo" type="text" />
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Nombre Negocio</label>
+      <div class="input-shell">
+        <input id="nuevoNombreNegocio" type="text" />
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Nombre Cliente</label>
+      <div class="input-shell">
+        <input id="nuevoNombreCliente" type="text" />
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Dirección</label>
+      <div class="input-shell">
+        <input id="nuevoDireccion" type="text" />
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Nit Facturación</label>
+      <div class="input-shell">
+        <input id="nuevoNit" type="text" placeholder="CF" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="modalCancelar">Cancelar</button>
+      <button class="btn btn-primary" id="modalGuardar">Guardar</button>
+    </div>
+    <div id="modalError" class="status-text status-error"></div>
+  </div>
+</div>
+
+<script>
+  // --------- ESTADO GLOBAL ---------
+  let baseClientes = [];       // Clientes que vienen del TXT o creados
+  let clienteSeleccionado = null;
+  let registrosGuardados = []; // Registros con Ruta, Día, Orden, etc.
+  const STORAGE_KEY = "registroClientes2_registros";
+  const STORAGE_BASE = "registroClientes2_base";
+
+  // --------- UTILIDADES ---------
+  function normalizarTexto(t) {
+    return (t || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function cargarDesdeLocalStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      registrosGuardados = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      registrosGuardados = [];
+    }
+    try {
+      const rawBase = localStorage.getItem(STORAGE_BASE);
+      baseClientes = rawBase ? JSON.parse(rawBase) : [];
+    } catch (e) {
+      baseClientes = [];
+    }
+    actualizarEstadoCarga();
+  }
+
+  function guardarEnLocalStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(registrosGuardados));
+    localStorage.setItem(STORAGE_BASE, JSON.stringify(baseClientes));
+  }
+
+  function actualizarEstadoCarga() {
+    const estadoCarga = document.getElementById("estadoCarga");
+    if (baseClientes.length === 0) {
+      estadoCarga.textContent = "Sin base de datos cargada.";
+      estadoCarga.className = "status-text";
+    } else {
+      estadoCarga.textContent = `Base de datos con ${baseClientes.length} clientes.`;
+      estadoCarga.className = "status-text status-ok";
+    }
+  }
+
+  function mostrarError(msg) {
+    const el = document.getElementById("estadoError");
+    el.textContent = msg || "";
+  }
+
+  function actualizarEstadoSeleccion() {
+    const estado = document.getElementById("estadoSeleccion");
+    if (!clienteSeleccionado) {
+      estado.innerHTML = "Ningún cliente seleccionado.";
+      return;
+    }
+    estado.innerHTML = `
+      <span>Cliente seleccionado:</span>
+      <div class="badge-selected">${clienteSeleccionado.codigo} · ${clienteSeleccionado.nombreNegocio}</div>
+    `;
+  }
+
+  // --------- LECTURA TXT ---------
+  function parsearTxtClientes(text) {
+    // Espera líneas separadas por \n, columnas separadas por TAB
+    // Cabecera opcional
+    const lineas = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    if (lineas.length === 0) return [];
+
+    let inicio = 0;
+    const primera = lineas[0].toLowerCase();
+    if (primera.includes("codigo") && primera.includes("negocio")) {
+      inicio = 1; // saltar encabezado
+    }
+
+    const clientes = [];
+    for (let i = inicio; i < lineas.length; i++) {
+      const partes = lineas[i].split(/\t|;/);
+      if (partes.length < 4) continue;
+      const codigo = partes[0]?.trim();
+      const nombreNegocio = partes[1]?.trim();
+      const nombreCliente = partes[2]?.trim() || "";
+      const direccion = partes[3]?.trim() || "";
+      const nit = (partes[4]?.trim() || "CF").toUpperCase();
+      if (!codigo || !nombreNegocio) continue;
+
+      clientes.push({
+        codigo,
+        nombreNegocio,
+        nombreCliente,
+        direccion,
+        nit
+      });
+    }
+    return clientes;
+  }
+
+  // --------- BUSQUEDA ---------
+  function actualizarSugerencias() {
+    const q = normalizarTexto(document.getElementById("buscador").value);
+    const cont = document.getElementById("suggestions");
+    cont.innerHTML = "";
+    if (!q || baseClientes.length === 0) {
+      cont.style.display = "none";
+      return;
+    }
+    const resultados = baseClientes.filter(c => {
+      const nc = normalizarTexto(c.codigo);
+      const nn = normalizarTexto(c.nombreNegocio);
+      const np = normalizarTexto(c.nombreCliente);
+      return nc.includes(q) || nn.includes(q) || np.includes(q);
+    }).slice(0, 30);
+
+    if (resultados.length === 0) {
+      cont.style.display = "none";
+      return;
+    }
+
+    resultados.forEach(c => {
+      const div = document.createElement("div");
+      div.className = "suggestions-item";
+      div.textContent = `${c.codigo} · ${c.nombreNegocio} · ${c.nombreCliente}`;
+      div.onclick = () => {
+        clienteSeleccionado = { ...c };
+        document.getElementById("buscador").value = c.nombreNegocio;
+        cont.style.display = "none";
+        actualizarEstadoSeleccion();
+        mostrarError("");
+      };
+      cont.appendChild(div);
+    });
+
+    cont.style.display = "block";
+  }
+
+  // --------- TABLA REESTRUCTURADA ---------
+  function construirTabla() {
+    const wrapper = document.getElementById("tablaWrapper");
+    const ruta = document.getElementById("ruta").value.trim();
+    const dia = document.getElementById("dia").value;
+    const soloGuardados = document.getElementById("toggleSoloGuardados").classList.contains("active");
+
+    let datos = [...registrosGuardados];
+
+    if (soloGuardados) {
+      datos = datos.filter(r => r.ruta === ruta && r.diaVisita === dia);
+    }
+
+    if (datos.length === 0) {
+      wrapper.innerHTML = '<div class="no-data">Sin datos reestructurados para la ruta y día actuales.</div>';
+      return;
+    }
+
+    datos.sort((a, b) => {
+      if (a.diaVisita !== b.diaVisita) return a.diaVisita.localeCompare(b.diaVisita);
+      return (a.orden || 0) - (b.orden || 0);
+    });
+
+    let html = `<table>
+      <thead>
+        <tr>
+          <th>Ruta</th>
+          <th>Día Visita</th>
+          <th>Orden</th>
+          <th>Código Negocio</th>
+          <th>Nombre Negocio</th>
+          <th>Nombre Cliente</th>
+          <th>Dirección</th>
+          <th>Nit Facturación</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    for (const r of datos) {
+      html += `
+        <tr>
+          <td>${r.ruta}</td>
+          <td>${r.diaVisita}</td>
+          <td>${r.orden}</td>
+          <td>${r.codigo}</td>
+          <td>${r.nombreNegocio}</td>
+          <td>${r.nombreCliente}</td>
+          <td>${r.direccion}</td>
+          <td>${r.nit}</td>
+        </tr>
+      `;
+    }
+
+    html += "</tbody></table>";
+    wrapper.innerHTML = html;
+  }
+
+  // --------- EXPORTAR EXCEL (TSV) ---------
+  function descargarExcel() {
+    const ruta = document.getElementById("ruta").value.trim();
+    const dia = document.getElementById("dia").value;
+    let datos = registrosGuardados.filter(r => r.ruta === ruta && r.diaVisita === dia);
+
+    if (datos.length === 0) {
+      alert("No hay datos para exportar en la ruta y día actuales.");
+      return;
+    }
+
+    datos.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+
+    const encabezados = [
+      "Ruta",
+      "Día Visita",
+      "Orden",
+      "Código Negocio",
+      "Nombre Negocio",
+      "Nombre Cliente",
+      "Dirección",
+      "Nit Facturación"
+    ];
+
+    const filas = [encabezados];
+
+    datos.forEach(r => {
+      filas.push([
+        r.ruta,
+        r.diaVisita,
+        r.orden,
+        r.codigo,
+        r.nombreNegocio,
+        r.nombreCliente,
+        r.direccion,
+        r.nit
+      ]);
+    });
+
+    const tsv = filas
+      .map(row => row.map(v => `"${(v || "").toString().replace(/"/g, '""')}"`).join("\t"))
+      .join("\r\n");
+
+    const blob = new Blob([tsv], { type: "text/tab-separated-values;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `restructura_r${ruta}_${dia}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // --------- GUARDAR REGISTRO ---------
+  function guardarRegistro() {
+    mostrarError("");
+    const ruta = document.getElementById("ruta").value.trim();
+    const dia = document.getElementById("dia").value;
+
+    if (!ruta) {
+      mostrarError("Ingrese la ruta.");
+      return;
+    }
+    if (!clienteSeleccionado) {
+      mostrarError("Seleccione o cree un cliente antes de guardar.");
+      return;
+    }
+
+    // Orden correlativo por ruta + día
+    const existentes = registrosGuardados.filter(r => r.ruta === ruta && r.diaVisita === dia);
+    const orden = existentes.length + 1;
+
+    const registro = {
+      ruta,
+      diaVisita: dia,
+      orden,
+      codigo: clienteSeleccionado.codigo,
+      nombreNegocio: clienteSeleccionado.nombreNegocio,
+      nombreCliente: clienteSeleccionado.nombreCliente,
+      direccion: clienteSeleccionado.direccion,
+      nit: clienteSeleccionado.nit || "CF"
     };
 
-    const daysOrder = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    registrosGuardados.push(registro);
+    guardarEnLocalStorage();
+    actualizarEstadoSeleccion();
+    construirTabla();
 
-    const fileInput = document.getElementById('fileInput');
-    const routeInput = document.getElementById('routeInput');
-    const daySelect = document.getElementById('daySelect');
+    document.getElementById("buscador").value = "";
+    clienteSeleccionado = null;
+    actualizarEstadoSeleccion();
+  }
 
-    const searchInput = document.getElementById('searchInput');
-    const searchStatus = document.getElementById('searchStatus');
-    const resultsContainer = document.getElementById('results');
-    const selectedBadge = document.getElementById('selectedBadge');
-    const selectedName = document.getElementById('selectedName');
-    const saveBtn = document.getElementById('saveBtn');
+  // --------- MANEJO MODAL NUEVO CLIENTE ---------
+  function abrirModalNuevo() {
+    document.getElementById("modalNuevo").style.display = "flex";
+    document.getElementById("modalError").textContent = "";
+    document.getElementById("nuevoCodigo").value = "";
+    document.getElementById("nuevoNombreNegocio").value = "";
+    document.getElementById("nuevoNombreCliente").value = "";
+    document.getElementById("nuevoDireccion").value = "";
+    document.getElementById("nuevoNit").value = "CF";
+  }
 
-    const restructBtn = document.getElementById('restructBtn');
-    const restructStatus = document.getElementById('restructStatus');
-    const restructContainer = document.getElementById('restructContainer');
-    const toggleRestructBtn = document.getElementById('toggleRestructBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const excelBtn = document.getElementById('excelBtn');
-    const toggleVisual = document.getElementById('toggleVisual');
+  function cerrarModalNuevo() {
+    document.getElementById("modalNuevo").style.display = "none";
+  }
 
-    const modalBackdrop = document.getElementById('modalBackdrop');
-    const modalRuta = document.getElementById('modalRuta');
-    const modalCodigoNegocio = document.getElementById('modalCodigoNegocio');
-    const modalNombreNegocio = document.getElementById('modalNombreNegocio');
-    const modalNombreCliente = document.getElementById('modalNombreCliente');
-    const modalDireccion = document.getElementById('modalDireccion');
-    const modalNit = document.getElementById('modalNit');
-    const modalDayInfo = document.getElementById('modalDayInfo');
-    const newClientBtn = document.getElementById('newClientBtn');
-    const cancelModalBtn = document.getElementById('cancelModalBtn');
-    const saveModalBtn = document.getElementById('saveModalBtn');
+  function guardarNuevoCliente() {
+    const codigo = document.getElementById("nuevoCodigo").value.trim();
+    const nombreNegocio = document.getElementById("nuevoNombreNegocio").value.trim();
+    const nombreCliente = document.getElementById("nuevoNombreCliente").value.trim();
+    const direccion = document.getElementById("nuevoDireccion").value.trim();
+    const nit = (document.getElementById("nuevoNit").value.trim() || "CF").toUpperCase();
+    const errEl = document.getElementById("modalError");
 
-    function getTodayLabel() {
-      const d = new Date();
-      const jsDay = d.getDay();
-      const map = {
-        1: 'Lunes',
-        2: 'Martes',
-        3: 'Miércoles',
-        4: 'Jueves',
-        5: 'Viernes',
-        6: 'Sábado'
-      };
-      return map[jsDay] || 'Lunes';
+    if (!codigo || !nombreNegocio) {
+      errEl.textContent = "Código y nombre del negocio son obligatorios.";
+      return;
     }
 
-    // LECTOR DE TXT
-    function parseTxtContent(text) {
-      const rawLines = text.split(/\r?\n/);
-      const trimmed = rawLines.map(l => l.trim());
-      const parsed = [];
+    const existente = baseClientes.find(c => c.codigo === codigo);
+    if (existente) {
+      errEl.textContent = "Ya existe un cliente con ese código en la base.";
+      return;
+    }
 
-      // ¿CSV/una línea por cliente?
-      const hasDelimiters = rawLines.some(l => /[;\t,|]/.test(l));
-      if (hasDelimiters) {
-        const lines = trimmed.filter(l => l.length > 0);
-        for (const line of lines) {
-          let parts;
-          if (line.includes('\t')) {
-            parts = line.split('\t');
-          } else if (line.includes(';')) {
-            parts = line.split(';');
-          } else if (line.includes('|')) {
-            parts = line.split('|');
-          } else {
-            parts = line.split(',');
-          }
-          if (parts.length < 5) continue;
+    const nuevo = { codigo, nombreNegocio, nombreCliente, direccion, nit };
+    baseClientes.push(nuevo);
+    clienteSeleccionado = { ...nuevo };
+    guardarEnLocalStorage();
+    actualizarEstadoCarga();
+    actualizarEstadoSeleccion();
+    document.getElementById("buscador").value = nombreNegocio;
+    cerrarModalNuevo();
+  }
 
-          const [codigoNegocio, nombreNegocio, nombreCliente, direccion, nitFacturacion] =
-            parts.map(p => p.trim());
+  // --------- LIMPIAR TODO ---------
+  function limpiarRegistros() {
+    if (!confirm("¿Borrar todos los registros guardados en este dispositivo?")) return;
+    registrosGuardados = [];
+    guardarEnLocalStorage();
+    construirTabla();
+  }
 
-          parsed.push({
-            codigoNegocio: codigoNegocio || '',
-            nombreNegocio: nombreNegocio || '',
-            nombreCliente: nombreCliente || '',
-            direccion: direccion || '',
-            nitFacturacion: nitFacturacion || ''
-          });
-        }
-        return parsed;
+  // --------- EVENTOS ---------
+  window.addEventListener("DOMContentLoaded", () => {
+    cargarDesdeLocalStorage();
+    actualizarEstadoSeleccion();
+    construirTabla();
+
+    document.getElementById("buscador").addEventListener("input", actualizarSugerencias);
+    document.getElementById("btnGuardar").addEventListener("click", guardarRegistro);
+    document.getElementById("btnReestructura").addEventListener("click", construirTabla);
+    document.getElementById("btnExcel").addEventListener("click", descargarExcel);
+
+    document.getElementById("rutaInputShell").addEventListener("click", (e) => {
+      // si se hace clic en el ícono de carpeta, abrir file picker
+      const isIcon = e.target.closest(".icon-folder");
+      if (isIcon) {
+        document.getElementById("fileInput").click();
       }
+    });
 
-      // FORMATO VERTICAL EN BLOQUES (líneas vacías separan clientes)
-      const groups = [];
-      let current = [];
-      for (const t of trimmed) {
-        if (!t) {
-          if (current.length) {
-            groups.push(current);
-            current = [];
-          }
-        } else {
-          current.push(t);
-        }
-      }
-      if (current.length) groups.push(current);
-
-      const isCodigo = s => /^\d{4}-\d+/.test(s);
-
-      for (const g of groups) {
-        if (g.length < 5) continue;
-
-        let codigoNegocio = '';
-        let nombreNegocio = '';
-        let nombreCliente = '';
-        let direccion = '';
-        let nitFacturacion = '';
-
-        if (isCodigo(g[0])) {
-          // Formato A: código primero
-          codigoNegocio = g[0];
-          nombreNegocio = g[1] || '';
-          nombreCliente = g[2] || '';
-          direccion = g[3] || '';
-          nitFacturacion = g[4] || '';
-        } else if (isCodigo(g[3])) {
-          // Formato B: caso ZONA 3
-          nombreNegocio = g[0] || '';
-          direccion = g[1] || '';
-          nombreCliente = g[2] || '';
-          codigoNegocio = g[3] || '';
-          nitFacturacion = g[4] || '';
-        } else {
-          continue;
-        }
-
-        parsed.push({
-          codigoNegocio: (codigoNegocio || '').trim(),
-          nombreNegocio: (nombreNegocio || '').trim(),
-          nombreCliente: (nombreCliente || '').trim(),
-          direccion: (direccion || '').trim(),
-          nitFacturacion: (nitFacturacion || '').trim()
-        });
-      }
-
-      return parsed;
-    }
-
-    function renderSearchResults(list) {
-      resultsContainer.innerHTML = '';
-      if (!list || list.length === 0) {
-        resultsContainer.style.display = 'none';
-        return;
-      }
-
-      list.forEach(client => {
-        const item = document.createElement('div');
-        item.className = 'result-item';
-        item.innerHTML = `
-          <div class="result-name">${client.nombreNegocio || 'Sin nombre de negocio'}</div>
-          <div class="result-meta">Código: ${client.codigoNegocio || '-'} · Cliente: ${client.nombreCliente || '-'}</div>
-          <div class="result-meta">${client.direccion || ''}</div>
-          <div class="result-meta">Nit: ${client.nitFacturacion || ''}</div>
-        `;
-        item.addEventListener('click', () => {
-          state.selectedClient = client;
-          selectedBadge.textContent = 'Cliente seleccionado:';
-          selectedName.textContent = client.nombreNegocio || client.nombreCliente || 'Sin nombre';
-        });
-        resultsContainer.appendChild(item);
-      });
-
-      resultsContainer.style.display = 'block';
-    }
-
-    function searchClients(query) {
-      const q = query.trim().toLowerCase();
-      if (!q) {
-        renderSearchResults([]);
-        if (state.baseData.length === 0) {
-          searchStatus.textContent = 'Cargue una base de datos .txt para comenzar.';
-        } else {
-          searchStatus.textContent = `Base cargada. Clientes disponibles: ${state.baseData.length}.`;
-        }
-        return;
-      }
-
-      const numeric = /^\d+$/.test(q);
-      const matches = state.baseData.filter(c => {
-        if (numeric) {
-          return (c.codigoNegocio || '').toLowerCase().includes(q) ||
-                 (c.nitFacturacion || '').toLowerCase().includes(q);
-        }
-        const nombreNegocio = (c.nombreNegocio || '').toLowerCase();
-        const nombreCliente = (c.nombreCliente || '').toLowerCase();
-        return nombreNegocio.includes(q) || nombreCliente.includes(q);
-      });
-
-      searchStatus.textContent = matches.length === 0
-        ? 'Sin coincidencias. Puede crear un cliente nuevo con el botón +'
-        : `Coincidencias encontradas: ${matches.length}`;
-
-      renderSearchResults(matches);
-    }
-
-    function ensureUniqueAssignment(day, client) {
-      const list = state.assignedByDay[day];
-      const key = [
-        client.codigoNegocio || '',
-        client.nombreNegocio || '',
-        client.nombreCliente || ''
-      ].join('|').toLowerCase();
-      const exists = list.some(c => ([
-        c.codigoNegocio || '',
-        c.nombreNegocio || '',
-        c.nombreCliente || ''
-      ].join('|').toLowerCase()) === key);
-      if (!exists) list.push({ ...client });
-    }
-
-    function renderRestruct() {
-      restructContainer.innerHTML = '';
-      let hasData = false;
-
-      daysOrder.forEach((dayLabel, idx) => {
-        const list = state.assignedByDay[dayLabel];
-        if (!list || list.length === 0) return;
-        hasData = true;
-
-        const block = document.createElement('div');
-        block.className = 'day-block';
-
-        const header = document.createElement('div');
-        header.className = 'day-header';
-        header.textContent = `DÍA ${idx + 1} – ${dayLabel.toUpperCase()}`;
-        block.appendChild(header);
-
-        const tableWrapper = document.createElement('div');
-        tableWrapper.className = 'table-wrapper';
-
-        const table = document.createElement('table');
-        const thead = document.createElement('thead');
-        thead.innerHTML = `
-          <tr>
-            <th>#</th>
-            <th>Ruta</th>
-            <th>Código Negocio</th>
-            <th>Nombre Negocio</th>
-            <th>Nombre Cliente</th>
-            <th>Dirección</th>
-            <th>Nit</th>
-          </tr>
-        `;
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        list.forEach((client, index) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${client.ruta || ''}</td>
-            <td>${client.codigoNegocio || ''}</td>
-            <td>${client.nombreNegocio || ''}</td>
-            <td>${client.nombreCliente || ''}</td>
-            <td>${client.direccion || ''}</td>
-            <td>${client.nitFacturacion || ''}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-
-        table.appendChild(tbody);
-        tableWrapper.appendChild(table);
-        block.appendChild(tableWrapper);
-        restructContainer.appendChild(block);
-      });
-
-      restructStatus.textContent = hasData
-        ? 'Vista reestructurada generada por día. Use Reestructura cuando actualice la asignación.'
-        : 'Sin clientes asignados todavía. Guarde clientes para ver la reestructura.';
-    }
-
-    function openModal() {
-      modalRuta.value = routeInput.value.trim();
-      modalCodigoNegocio.value = '';
-      modalNombreNegocio.value = '';
-      modalNombreCliente.value = '';
-      modalDireccion.value = '';
-      modalNit.value = '';
-      const day = daySelect.value;
-      modalDayInfo.innerHTML = `Se asignará al día <span class="chip-day">${day}</span>`;
-      modalBackdrop.style.display = 'flex';
-    }
-
-    function closeModal() {
-      modalBackdrop.style.display = 'none';
-    }
-
-    // EVENTOS
-    fileInput.addEventListener('change', e => {
-      const file = e.target.files && e.target.files[0];
+    document.getElementById("fileInput").addEventListener("change", (e) => {
+      const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
-      reader.onload = evt => {
+      reader.onload = (evt) => {
         try {
-          const text = String(evt.target.result || '');
-          const parsed = parseTxtContent(text);
-          state.baseData = parsed;
-          searchStatus.textContent = `Base cargada: ${parsed.length} clientes.`;
-          searchClients(searchInput.value || '');
+          const contenido = evt.target.result;
+          const clientes = parsearTxtClientes(contenido);
+          if (clientes.length === 0) {
+            mostrarError("No se reconocieron clientes en el archivo .txt.");
+            return;
+          }
+          baseClientes = clientes;
+          guardarEnLocalStorage();
+          actualizarEstadoCarga();
+          mostrarError("");
         } catch (err) {
           console.error(err);
-          searchStatus.textContent = 'Error al leer el archivo. Verifique el formato.';
-          searchStatus.classList.add('error');
+          mostrarError("Error al leer el archivo .txt.");
         }
       };
-      reader.readAsText(file, 'utf-8');
+      reader.readAsText(file, "utf-8");
     });
 
-    searchInput.addEventListener('input', e => {
-      searchClients(e.target.value || '');
+    document.getElementById("toggleSoloGuardados").addEventListener("click", () => {
+      const t = document.getElementById("toggleSoloGuardados");
+      t.classList.toggle("active");
+      construirTabla();
     });
 
-    saveBtn.addEventListener('click', () => {
-      if (!state.selectedClient) {
-        searchStatus.textContent = 'Seleccione un cliente de la lista o cree uno nuevo.';
-        searchStatus.classList.add('error');
-        return;
-      }
-      searchStatus.classList.remove('error');
+    document.getElementById("btnLimpiarTodo").addEventListener("click", limpiarRegistros);
 
-      const day = daySelect.value;
-      const currentRoute = routeInput.value.trim();
-      const baseClient = state.selectedClient;
-      const clientForDay = { ...baseClient };
-      if (currentRoute) clientForDay.ruta = currentRoute;
+    // Modal nuevo cliente
+    document.getElementById("btnNuevo").addEventListener("click", abrirModalNuevo);
+    document.getElementById("modalCerrar").addEventListener("click", cerrarModalNuevo);
+    document.getElementById("modalCancelar").addEventListener("click", cerrarModalNuevo);
+    document.getElementById("modalGuardar").addEventListener("click", guardarNuevoCliente);
 
-      ensureUniqueAssignment(day, clientForDay);
-      restructStatus.textContent = `Cliente asignado a ${day}. Presione Reestructura para actualizar la tabla.`;
+    document.getElementById("modalNuevo").addEventListener("click", (e) => {
+      if (e.target.id === "modalNuevo") cerrarModalNuevo();
     });
-
-    toggleRestructBtn.addEventListener('click', () => {
-      const isHidden = restructContainer.style.display === 'none';
-      if (isHidden) {
-        restructContainer.style.display = 'block';
-        toggleVisual.classList.add('on');
-      } else {
-        restructContainer.style.display = 'none';
-        toggleVisual.classList.remove('on');
-      }
-    });
-
-    clearBtn.addEventListener('click', () => {
-      const ok = confirm('¿Está seguro de borrar todas las asignaciones y limpiar la tabla?');
-      if (!ok) return;
-
-      Object.keys(state.assignedByDay).forEach(day => {
-        state.assignedByDay[day] = [];
-      });
-      restructContainer.innerHTML = '';
-      restructStatus.textContent = 'Datos limpiados. Puede comenzar de nuevo.';
-    });
-
-    restructBtn.addEventListener('click', () => {
-      renderRestruct();
-    });
-
-    excelBtn.addEventListener('click', () => {
-      const hasData = daysOrder.some(d => (state.assignedByDay[d] || []).length > 0);
-      if (!hasData) {
-        alert('No hay datos reestructurados para exportar. Asigne clientes y use Reestructura primero.');
-        return;
-      }
-
-      const headers = [
-        'RUTA',
-        'DÍA VISITA',
-        'ORDEN',
-        'CÓDIGO NEGOCIO',
-        'NOMBRE NEGOCIO',
-        'NOMBRE CLIENTE',
-        'DIRECCIÓN',
-        'NIT FACTURACIÓN'
-      ];
-      const rows = [headers];
-
-      daysOrder.forEach(dayLabel => {
-        const list = state.assignedByDay[dayLabel];
-        if (!list || list.length === 0) return;
-
-        list.forEach((client, index) => {
-          const ruta = client.ruta || '';
-          const diaVisita = dayLabel;
-          const orden = index + 1;
-          const codigoNegocio = client.codigoNegocio || '';
-          const nombreNegocio = client.nombreNegocio || '';
-          const nombreCliente = client.nombreCliente || '';
-          const direccion = client.direccion || '';
-          const nit = client.nitFacturacion || '';
-
-          rows.push([
-            ruta,
-            diaVisita,
-            String(orden),
-            codigoNegocio,
-            nombreNegocio,
-            nombreCliente,
-            direccion,
-            nit
-          ]);
-        });
-      });
-
-      const csvContent = rows
-        .map(cols => cols.map(v => {
-          const s = (v === undefined || v === null ? '' : String(v)).replace(/"/g, '""');
-          return `"${s}"`;
-        }).join(';'))
-        .join('\r\n');
-
-      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Base_reestructurada.csv';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    });
-
-    newClientBtn.addEventListener('click', () => {
-      if (state.baseData.length === 0) {
-        searchStatus.textContent = 'Creando cliente nuevo sin base cargada.';
-      }
-      openModal();
-    });
-
-    cancelModalBtn.addEventListener('click', () => {
-      closeModal();
-    });
-
-    saveModalBtn.addEventListener('click', () => {
-      const ruta = modalRuta.value.trim();
-      const codigoNegocio = modalCodigoNegocio.value.trim();
-      const nombreNegocio = modalNombreNegocio.value.trim();
-      const nombreCliente = modalNombreCliente.value.trim();
-      const direccion = modalDireccion.value.trim();
-      const nitFacturacion = modalNit.value.trim();
-
-      if (!codigoNegocio || !nombreNegocio || !nombreCliente || !direccion || !nitFacturacion) {
-        alert('Complete todos los campos del nuevo cliente.');
-        return;
-      }
-
-      const newClient = { codigoNegocio, nombreNegocio, nombreCliente, direccion, nitFacturacion };
-
-      state.baseData.push(newClient);
-
-      const day = daySelect.value;
-      const clientForDay = { ...newClient };
-      const currentRoute = routeInput.value.trim();
-      clientForDay.ruta = ruta || currentRoute || '';
-      ensureUniqueAssignment(day, clientForDay);
-
-      closeModal();
-
-      state.selectedClient = newClient;
-      selectedBadge.textContent = 'Cliente creado y asignado:';
-      selectedName.textContent = newClient.nombreNegocio || newClient.nombreCliente;
-      searchStatus.textContent = `Cliente nuevo agregado a la base y asignado a ${day}.`;
-
-      if (searchInput.value.trim()) {
-        searchClients(searchInput.value || '');
-      }
-    });
-
-    modalBackdrop.addEventListener('click', e => {
-      if (e.target === modalBackdrop) {
-        closeModal();
-      }
-    });
-
-    function runDevTests() {
-      const sample = '2000-1018349;TIENDA LA BENDICION #3;DIEGO TOJIN;EL PROGRESO-SANARATE;CF\n' +
-                     '2000-1165850;TIENDA ESQUIPULAS;RICARDO UZ;EL PROGRESO-SANARATE;9430824-1';
-      const parsed = parseTxtContent(sample);
-      console.assert(parsed.length === 2, 'DevTest: debería leer 2 filas');
-
-      const vertical = [
-        '2000-999999',
-        'TIENDA PRUEBA',
-        'CLIENTE PRUEBA',
-        'DIRECCION X',
-        'CF'
-      ].join('\n');
-      const parsedVertical = parseTxtContent(vertical);
-      console.assert(parsedVertical.length === 1, 'DevTest vertical: debería leer 1 cliente');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const todayLabel = getTodayLabel();
-      daySelect.value = todayLabel;
-
-      if (window.location.search.includes('devtest=1')) {
-        runDevTests();
-      }
-
-      if ('serviceWorker' in navigator && window.isSecureContext) {
-        navigator.serviceWorker.register('service-worker.js').catch(() => {});
-      }
-    });
-  </script>
+  });
+</script>
 </body>
 </html>
