@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>Registro de Clientes</title>
+
+  <!-- PWA manifest & icons -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+  <meta name="theme-color" content="#0F5C9A">
+
+  <style>
+    :root {
+      --bg: #E5E7EB;          /* gris neutro de fondo */
+      --card: #FFFFFF;        /* tarjetas blancas tipo Fiori */
+      --accent: #0F5C9A;      /* azul corporativo estilo SAP */
+      --accent-soft: #E3ECF5; /* azul muy suave para fondos */
+      --border: #D1D5DB;      /* borde gris claro */
+      --text-main: #111827;   /* texto principal */
+      --text-soft: #6B7280;   /* texto secundario */
+      --danger: #B91C1C;      /* mensajes de error */
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px 12px;
+      background: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 430px; /* más compacto, móvil corporativo */
+      display: flex;
+      flex-direction: column;
+      gap: 16px; /* más espacio entre tarjetas */
+    }
+
+    .top-bar {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+      border: 1px solid var(--border);
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #F3F4F6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.05s, box-shadow 0.15s;
+    }
+
+    .icon-button:active {
+      transform: scale(0.97);
+      background: #E5E7EB;
+      box-shadow: inset 0 0 0 1px var(--border);
+    }
+
+    .top-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .top-right {
+      text-align: right;
+      max-width: 50%;
+    }
+
+    .top-right span {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
+
+    .input-sm {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+      width: 96px;
+      background: #F9FAFB;
+    }
+
+    .input-sm:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+    }
+
+    .route-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .row.space-between {
+      justify-content: space-between;
+    }
+
+    .select {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 14px;
+      outline: none;
+      flex: 1;
+      background: #F9FAFB;
+    }
+
+    .select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+    }
+
+    .day-hint {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .search-input {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+      flex: 1;
+      background: #F9FAFB;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+    }
+
+    .pill-button {
+      border-radius: 10px; /* estilo rectángulo suave SAP Fiori */
+      border: none;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--accent);
+      color: #FFF;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 40px; /* botón ancho y cómodo para dedo */
+      width: 100%; /* por defecto ocupan todo el ancho en mobile */
+      transition: background 0.15s, transform 0.05s, box-shadow 0.15s;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+    }
+
+    .pill-button.secondary {
+      background: #F3F4F6;
+      color: var(--text-main);
+      box-shadow: none;
+      border: 1px solid var(--border);
+    }
+
+    .pill-button.full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .pill-button:active {
+      transform: translateY(1px);
+      background: #0B4A7A;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2);
+    }
+
+    .pill-button.secondary:active {
+      background: #E5E7EB;
+      box-shadow: inset 0 0 0 1px var(--border);
+    }
+
+    .results-list {
+      max-height: 150px;
+      overflow-y: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #F9FAFB;
+    }
+
+    .result-item {
+      padding: 6px 8px;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+    }
+
+    .result-item:hover {
+      background: #E5EDF7;
+    }
+
+    .result-name {
+      font-weight: 600;
+    }
+
+    .result-meta {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .selected-badge {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .selected-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-text {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .status-text.error {
+      color: var(--danger);
+    }
+
+    .restruct-card {
+      margin-top: 2px;
+    }
+
+    .day-block {
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #F9FAFB;
+      overflow: hidden;
+    }
+
+    .day-header {
+      padding: 6px 8px;
+      background: var(--accent-soft);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #E5E7EB;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #F3F4F6;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #374151;
+    }
+
+    tr:nth-child(even) td {
+      background: #F9FAFB;
+    }
+
+    tr:nth-child(odd) td {
+      background: #FFFFFF;
+    }
+
+    .footer-space {
+      height: 10px;
+    }
+
+    .restruct-button {
+      margin-top: 2px;
+    }
+
+    /* Toggle switch */
+    .toggle-switch {
+      width: 32px;
+      height: 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #F3F4F6;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      transition: background 0.15s;
+    }
+
+    .toggle-knob {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #4B5563;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .toggle-switch.on {
+      background: var(--accent-soft);
+    }
+
+    .toggle-switch.on .toggle-knob {
+      transform: translateX(14px);
+      background: var(--accent);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.38);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 16px 18px 14px;
+      width: 92%;
+      max-width: 430px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .modal-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .modal-input {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 9px 10px;
+      font-size: 14px;
+      outline: none;
+      width: 100%;
+      background: #F9FAFB;
+    }
+
+    .modal-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .chip-day {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .hidden-input {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Encabezado / pestaña superior -->
+    <header class="top-bar">
+      <label class="icon-button" title="Cargar base de datos (.txt)">
+        📁
+        <input id="fileInput" type="file" accept=".txt" class="hidden-input" />
+      </label>
+
+      <div class="row" style="flex:1; gap:12px;">
+        <div class="route-group" style="flex:1;">
+          <span class="field-label">Ruta</span>
+          <input id="routeInput" type="text" class="input-sm" placeholder="17029" style="width:100%;"/>
+        </div>
+
+        <div style="flex:1;">
+          <span class="field-label">Día</span>
+          <select id="daySelect" class="select" style="width:100%;">
+            <option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option>
+            <option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+            <option value="Sábado">Sábado</option>
+          </select>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- Búsqueda + nuevo cliente -->
+    <section class="card">
+      <div class="field-label" style="display:none;">Buscar cliente</div>
+      <div class="row">
+        <input id="searchInput" type="text" class="search-input" placeholder="Buscar por ruta o negocio" />
+        <button id="newClientBtn" class="icon-button" title="Nuevo cliente">
+          +
+        </button>
+      </div>
+      <div id="searchStatus" class="status-text">Cargue una base de datos .txt para comenzar.</div>
+      <div id="results" class="results-list" style="display:none;"></div>
+      <div id="selectionInfo" class="row space-between" style="margin-top:4px;">
+        <div>
+          <div class="selected-badge" id="selectedBadge">Ningún cliente seleccionado.</div>
+          <div class="selected-name" id="selectedName"></div>
+        </div>
+        <button id="saveBtn" class="pill-button" style="min-width:96px;">
+          GUARDAR
+        </button>
+      </div>
+    </section>
+
+    <!-- Reestructura -->
+    <section class="card restruct-card">
+      <div class="row space-between" style="align-items:center;">
+        <div>
+          <div class="field-label">Tabla reestructurada</div>
+          <div class="status-text" id="restructStatus">Presione Reestructura para generar la vista organizada por día.</div>
+        </div>
+      </div>
+      <div class="row" style="gap:6px; margin-top:4px;">
+        <button id="toggleRestructBtn" class="icon-button" title="Ocultar/mostrar tabla">
+          <span id="toggleVisual" class="toggle-switch on">
+            <span class="toggle-knob"></span>
+          </span>
+        </button>
+        <button id="clearBtn" class="icon-button" title="Limpiar asignaciones">🗑️</button>
+        <button id="excelBtn" class="pill-button secondary" style="padding:4px 10px;font-size:11px;">EXCEL</button>
+        <button id="restructBtn" class="pill-button full restruct-button">Reestructura</button>
+      </div>
+      <div id="restructContainer"></div>
+    </section>
+
+    <div class="footer-space"></div>
+  </div>
+
+  <!-- Modal nuevo cliente -->
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-title">Nuevo cliente</div>
+      <div class="status-text" id="modalDayInfo"></div>
+      <div class="modal-grid">
+        <div>
+          <div class="field-label">Ruta</div>
+          <input id="modalRuta" type="text" class="modal-input" />
+        </div>
+        <div>
+          <div class="field-label">Código</div>
+          <input id="modalCodigo" type="text" class="modal-input" />
+        </div>
+        <div>
+          <div class="field-label">Nombre del negocio</div>
+          <input id="modalNombre" type="text" class="modal-input" />
+        </div>
+        <div>
+          <div class="field-label">Dirección</div>
+          <input id="modalDireccion" type="text" class="modal-input" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelModalBtn" class="pill-button secondary">Cancelar</button>
+        <button id="saveModalBtn" class="pill-button">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Estado principal
+    const state = {
+      baseData: [], // clientes de la base original + nuevos clientes
+      assignedByDay: { // clientes asignados por día
+        'Lunes': [],
+        'Martes': [],
+        'Miércoles': [],
+        'Jueves': [],
+        'Viernes': [],
+        'Sábado': []
+      },
+      selectedClient: null
+    };
+
+    const daysOrder = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+    // Elementos DOM
+    const fileInput = document.getElementById('fileInput');
+    const routeInput = document.getElementById('routeInput');
+    const daySelect = document.getElementById('daySelect');
+    const dayHint = null; // ya no se usa texto de pista
+
+    const searchInput = document.getElementById('searchInput');
+    const searchStatus = document.getElementById('searchStatus');
+    const resultsContainer = document.getElementById('results');
+    const selectedBadge = document.getElementById('selectedBadge');
+    const selectedName = document.getElementById('selectedName');
+    const saveBtn = document.getElementById('saveBtn');
+
+    const restructBtn = document.getElementById('restructBtn');
+    const restructStatus = document.getElementById('restructStatus');
+    const restructContainer = document.getElementById('restructContainer');
+    const toggleRestructBtn = document.getElementById('toggleRestructBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const excelBtn = document.getElementById('excelBtn');
+    const toggleVisual = document.getElementById('toggleVisual');
+
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalRuta = document.getElementById('modalRuta');
+    const modalCodigo = document.getElementById('modalCodigo');
+    const modalNombre = document.getElementById('modalNombre');
+    const modalDireccion = document.getElementById('modalDireccion');
+    const modalDayInfo = document.getElementById('modalDayInfo');
+    const newClientBtn = document.getElementById('newClientBtn');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+    const saveModalBtn = document.getElementById('saveModalBtn');
+
+    // Utilidades
+    function getTodayLabel() {
+      const d = new Date();
+      const jsDay = d.getDay(); // 0=Domingo ... 6=Sábado
+      const map = {
+        1: 'Lunes',
+        2: 'Martes',
+        3: 'Miércoles',
+        4: 'Jueves',
+        5: 'Viernes',
+        6: 'Sábado'
+      };
+      return map[jsDay] || 'Lunes';
+    }
+
+    function parseTxtContent(text) {
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+      const parsed = [];
+
+      for (const line of lines) {
+        let parts;
+        if (line.includes('\t')) {
+          parts = line.split('\t');
+        } else if (line.includes(';')) {
+          parts = line.split(';');
+        } else if (line.includes('|')) {
+          parts = line.split('|');
+        } else {
+          parts = line.split(',');
+        }
+
+        if (parts.length < 4) continue;
+
+        const [ruta, codigo, nombre, direccion] = parts.map(p => p.trim());
+        parsed.push({
+          ruta: ruta || '',
+          codigo: codigo || '',
+          nombre: nombre || '',
+          direccion: direccion || ''
+        });
+      }
+
+      return parsed;
+    }
+
+    function renderSearchResults(list) {
+      resultsContainer.innerHTML = '';
+      if (!list || list.length === 0) {
+        resultsContainer.style.display = 'none';
+        return;
+      }
+
+      list.forEach(client => {
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        item.innerHTML = `
+          <div class="result-name">${client.nombre || 'Sin nombre'}</div>
+          <div class="result-meta">Ruta: ${client.ruta || '-'} · Código: ${client.codigo || '-'}</div>
+          <div class="result-meta">${client.direccion || ''}</div>
+        `;
+        item.addEventListener('click', () => {
+          state.selectedClient = client;
+          selectedBadge.textContent = 'Cliente seleccionado:';
+          selectedName.textContent = client.nombre || 'Sin nombre';
+        });
+        resultsContainer.appendChild(item);
+      });
+
+      resultsContainer.style.display = 'block';
+    }
+
+    function searchClients(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        renderSearchResults([]);
+        if (state.baseData.length === 0) {
+          searchStatus.textContent = 'Cargue una base de datos .txt para comenzar.';
+        } else {
+          searchStatus.textContent = `Base cargada. Clientes disponibles: ${state.baseData.length}.`;
+        }
+        return;
+      }
+
+      const numeric = /^\d+$/.test(q);
+      const matches = state.baseData.filter(c => {
+        if (numeric) {
+          return (c.ruta || '').toLowerCase().includes(q) || (c.codigo || '').toLowerCase().includes(q);
+        }
+        return (c.nombre || '').toLowerCase().includes(q);
+      });
+
+      if (matches.length === 0) {
+        searchStatus.textContent = 'Sin coincidencias. Puede crear un cliente nuevo con el botón +';
+      } else {
+        searchStatus.textContent = `Coincidencias encontradas: ${matches.length}`;
+      }
+
+      renderSearchResults(matches);
+    }
+
+    function ensureUniqueAssignment(day, client) {
+      const list = state.assignedByDay[day];
+      const key = (client.ruta || '') + '|' + (client.codigo || '') + '|' + (client.nombre || '');
+      const exists = list.some(c => (
+        (c.ruta || '') + '|' + (c.codigo || '') + '|' + (c.nombre || '')
+      ) === key);
+      if (!exists) {
+        list.push({ ...client });
+      }
+    }
+
+    function renderRestruct() {
+      restructContainer.innerHTML = '';
+
+      let hasData = false;
+      daysOrder.forEach((dayLabel, idx) => {
+        const list = state.assignedByDay[dayLabel];
+        if (!list || list.length === 0) return;
+        hasData = true;
+
+        const block = document.createElement('div');
+        block.className = 'day-block';
+
+        const header = document.createElement('div');
+        header.className = 'day-header';
+        header.textContent = `DÍA ${idx + 1} – ${dayLabel.toUpperCase()}`;
+        block.appendChild(header);
+
+        const tableWrapper = document.createElement('div');
+        tableWrapper.className = 'table-wrapper';
+
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+          <tr>
+            <th>#</th>
+            <th>Ruta</th>
+            <th>Código</th>
+            <th>Negocio</th>
+            <th>Dirección</th>
+          </tr>
+        `;
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        list.forEach((client, index) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${client.ruta || ''}</td>
+            <td>${client.codigo || ''}</td>
+            <td>${client.nombre || ''}</td>
+            <td>${client.direccion || ''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        tableWrapper.appendChild(table);
+        block.appendChild(tableWrapper);
+        restructContainer.appendChild(block);
+      });
+
+      if (!hasData) {
+        restructStatus.textContent = 'Sin clientes asignados todavía. Guarde clientes para ver la reestructura.';
+      } else {
+        restructStatus.textContent = 'Vista reestructurada generada por día. Use Reestructura cuando actualice la asignación.';
+      }
+    }
+
+    function openModal() {
+      modalRuta.value = routeInput.value.trim();
+      modalCodigo.value = '';
+      modalNombre.value = '';
+      modalDireccion.value = '';
+      const day = daySelect.value;
+      modalDayInfo.innerHTML = `Se asignará al día <span class="chip-day">${day}</span>`;
+      modalBackdrop.style.display = 'flex';
+    }
+
+    function closeModal() {
+      modalBackdrop.style.display = 'none';
+    }
+
+    // Eventos
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const text = String(evt.target.result || '');
+          const parsed = parseTxtContent(text);
+          state.baseData = parsed;
+          searchStatus.textContent = `Base cargada: ${parsed.length} clientes.`;
+          searchClients(searchInput.value || '');
+        } catch (err) {
+          console.error(err);
+          searchStatus.textContent = 'Error al leer el archivo. Verifique el formato.';
+          searchStatus.classList.add('error');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      searchClients(e.target.value || '');
+    });
+
+    saveBtn.addEventListener('click', () => {
+      if (!state.selectedClient) {
+        searchStatus.textContent = 'Seleccione un cliente de la lista o cree uno nuevo.';
+        searchStatus.classList.add('error');
+        return;
+      }
+      searchStatus.classList.remove('error');
+
+      const day = daySelect.value;
+      const currentRoute = routeInput.value.trim();
+      const baseClient = state.selectedClient;
+      const clientForDay = { ...baseClient };
+      if (currentRoute) {
+        clientForDay.ruta = currentRoute;
+      }
+
+      ensureUniqueAssignment(day, clientForDay);
+      restructStatus.textContent = `Cliente asignado a ${day}. Presione Reestructura para actualizar la tabla.`;
+    });
+
+    toggleRestructBtn.addEventListener('click', () => {
+      const isHidden = restructContainer.style.display === 'none';
+      if (isHidden) {
+        restructContainer.style.display = 'block';
+        toggleVisual.classList.add('on');
+      } else {
+        restructContainer.style.display = 'none';
+        toggleVisual.classList.remove('on');
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      const ok = confirm('¿Está seguro de borrar todas las asignaciones y limpiar la tabla?');
+      if (!ok) return;
+
+      Object.keys(state.assignedByDay).forEach(day => {
+        state.assignedByDay[day] = [];
+      });
+      restructContainer.innerHTML = '';
+      restructStatus.textContent = 'Datos limpiados. Puede comenzar de nuevo.';
+    });
+
+    restructBtn.addEventListener('click', () => {
+      renderRestruct();
+    });
+
+    excelBtn.addEventListener('click', () => {
+      const hasData = daysOrder.some(d => (state.assignedByDay[d] || []).length > 0);
+      if (!hasData) {
+        alert('No hay datos reestructurados para exportar. Asigne clientes y use Reestructura primero.');
+        return;
+      }
+
+      const headers = ['DÍA','ORDEN','RUTA','CÓDIGO','NOMBRE DEL NEGOCIO','DIRECCIÓN'];
+      const rows = [];
+      rows.push(headers);
+
+      daysOrder.forEach((dayLabel, idx) => {
+        const list = state.assignedByDay[dayLabel];
+        if (!list || list.length === 0) return;
+        // Fila título de día
+        rows.push([`DÍA ${idx + 1} – ${dayLabel.toUpperCase()}`,'','','','','']);
+        list.forEach((client, index) => {
+          const dia = dayLabel;
+          const orden = index + 1;
+          const ruta = client.ruta || '';
+          const codigo = client.codigo || '';
+          const nombre = client.nombre || '';
+          const direccion = client.direccion || '';
+          rows.push([dia, String(orden), ruta, codigo, nombre, direccion]);
+        });
+      });
+
+      // Construir CSV (usamos ; como separador para que se vea bien en configuraciones ES)
+      const csvContent = rows
+        .map(cols => cols.map(v => {
+          const s = (v ?? '').toString().replace(/"/g, '""');
+          return `"${s}"`;
+        }).join(';'))
+        .join('\r\n');
+
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Base_reestructurada.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
+
+    newClientBtn.addEventListener('click', () => {
+      if (state.baseData.length === 0) {
+        // Permitimos crear aunque no haya base, pero lo indicamos
+        searchStatus.textContent = 'Creando cliente nuevo sin base cargada.';
+      }
+      openModal();
+    });
+
+    cancelModalBtn.addEventListener('click', () => {
+      closeModal();
+    });
+
+    saveModalBtn.addEventListener('click', () => {
+      const ruta = modalRuta.value.trim();
+      const codigo = modalCodigo.value.trim();
+      const nombre = modalNombre.value.trim();
+      const direccion = modalDireccion.value.trim();
+
+      if (!ruta || !codigo || !nombre || !direccion) {
+        alert('Complete todos los campos del nuevo cliente.');
+        return;
+      }
+
+      const newClient = { ruta, codigo, nombre, direccion };
+
+      // Agregar a base interna para futuras búsquedas
+      state.baseData.push(newClient);
+
+      // Asignar al día seleccionado
+      const day = daySelect.value;
+      ensureUniqueAssignment(day, newClient);
+
+      closeModal();
+
+      // Actualizar mensajes y selección
+      state.selectedClient = newClient;
+      selectedBadge.textContent = 'Cliente creado y asignado:';
+      selectedName.textContent = newClient.nombre;
+      searchStatus.textContent = `Cliente nuevo agregado a la base y asignado a ${day}.`;
+
+      // Si hay texto de búsqueda, refrescar
+      if (searchInput.value.trim()) {
+        searchClients(searchInput.value || '');
+      }
+    });
+
+    // Cerrar modal al tocar fuera
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) {
+        closeModal();
+      }
+    });
+
+    // Inicialización
+    function initDaySelector() {
+      const todayLabel = getTodayLabel();
+      daySelect.value = todayLabel;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initDaySelector();
+
+      // Registrar service worker para PWA
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+          .catch(err => console.error('SW registration failed', err));
+      }
+    });
+  </script>
+</body>
+</html>
