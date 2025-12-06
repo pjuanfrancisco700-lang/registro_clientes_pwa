@@ -57,12 +57,6 @@
       border: 1px solid var(--border);
     }
 
-    .top-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
     .icon-button {
       width: 36px;
       height: 36px;
@@ -81,27 +75,6 @@
       transform: scale(0.97);
       background: #E5E7EB;
       box-shadow: inset 0 0 0 1px var(--border);
-    }
-
-    .top-title {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-
-    .top-right {
-      text-align: right;
-      max-width: 50%;
-    }
-
-    .top-right span {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-soft);
     }
 
     .field-label {
@@ -167,11 +140,6 @@
     .select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 1px var(--accent-soft);
-    }
-
-    .day-hint {
-      font-size: 11px;
-      color: var(--text-soft);
     }
 
     .search-input {
@@ -485,7 +453,7 @@
     <section class="card">
       <div class="field-label" style="display:none;">Buscar cliente</div>
       <div class="row">
-        <input id="searchInput" type="text" class="search-input" placeholder="Buscar por ruta o negocio" />
+        <input id="searchInput" type="text" class="search-input" placeholder="Buscar por código, negocio o cliente" />
         <button id="newClientBtn" class="icon-button" title="Nuevo cliente">
           +
         </button>
@@ -538,16 +506,24 @@
           <input id="modalRuta" type="text" class="modal-input" />
         </div>
         <div>
-          <div class="field-label">Código</div>
-          <input id="modalCodigo" type="text" class="modal-input" />
+          <div class="field-label">Código negocio</div>
+          <input id="modalCodigoNegocio" type="text" class="modal-input" />
         </div>
         <div>
-          <div class="field-label">Nombre del negocio</div>
-          <input id="modalNombre" type="text" class="modal-input" />
+          <div class="field-label">Nombre negocio</div>
+          <input id="modalNombreNegocio" type="text" class="modal-input" />
+        </div>
+        <div>
+          <div class="field-label">Nombre cliente</div>
+          <input id="modalNombreCliente" type="text" class="modal-input" />
         </div>
         <div>
           <div class="field-label">Dirección</div>
           <input id="modalDireccion" type="text" class="modal-input" />
+        </div>
+        <div>
+          <div class="field-label">Nit facturación</div>
+          <input id="modalNit" type="text" class="modal-input" />
         </div>
       </div>
       <div class="modal-actions">
@@ -578,7 +554,6 @@
     const fileInput = document.getElementById('fileInput');
     const routeInput = document.getElementById('routeInput');
     const daySelect = document.getElementById('daySelect');
-    const dayHint = null; // ya no se usa texto de pista
 
     const searchInput = document.getElementById('searchInput');
     const searchStatus = document.getElementById('searchStatus');
@@ -597,9 +572,11 @@
 
     const modalBackdrop = document.getElementById('modalBackdrop');
     const modalRuta = document.getElementById('modalRuta');
-    const modalCodigo = document.getElementById('modalCodigo');
-    const modalNombre = document.getElementById('modalNombre');
+    const modalCodigoNegocio = document.getElementById('modalCodigoNegocio');
+    const modalNombreNegocio = document.getElementById('modalNombreNegocio');
+    const modalNombreCliente = document.getElementById('modalNombreCliente');
     const modalDireccion = document.getElementById('modalDireccion');
+    const modalNit = document.getElementById('modalNit');
     const modalDayInfo = document.getElementById('modalDayInfo');
     const newClientBtn = document.getElementById('newClientBtn');
     const cancelModalBtn = document.getElementById('cancelModalBtn');
@@ -620,6 +597,8 @@
       return map[jsDay] || 'Lunes';
     }
 
+    // Espera archivos con columnas en este orden:
+    // Código Negocio; Nombre Negocio; Nombre Cliente; Dirección; Nit Facturación
     function parseTxtContent(text) {
       const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
       const parsed = [];
@@ -636,14 +615,15 @@
           parts = line.split(',');
         }
 
-        if (parts.length < 4) continue;
+        if (parts.length < 5) continue;
 
-        const [ruta, codigo, nombre, direccion] = parts.map(p => p.trim());
+        const [codigoNegocio, nombreNegocio, nombreCliente, direccion, nitFacturacion] = parts.map(p => p.trim());
         parsed.push({
-          ruta: ruta || '',
-          codigo: codigo || '',
-          nombre: nombre || '',
-          direccion: direccion || ''
+          codigoNegocio: codigoNegocio || '',
+          nombreNegocio: nombreNegocio || '',
+          nombreCliente: nombreCliente || '',
+          direccion: direccion || '',
+          nitFacturacion: nitFacturacion || ''
         });
       }
 
@@ -661,14 +641,15 @@
         const item = document.createElement('div');
         item.className = 'result-item';
         item.innerHTML = `
-          <div class="result-name">${client.nombre || 'Sin nombre'}</div>
-          <div class="result-meta">Ruta: ${client.ruta || '-'} · Código: ${client.codigo || '-'}</div>
+          <div class="result-name">${client.nombreNegocio || 'Sin nombre de negocio'}</div>
+          <div class="result-meta">Código: ${client.codigoNegocio || '-'} · Cliente: ${client.nombreCliente || '-'}</div>
           <div class="result-meta">${client.direccion || ''}</div>
+          <div class="result-meta">Nit: ${client.nitFacturacion || ''}</div>
         `;
         item.addEventListener('click', () => {
           state.selectedClient = client;
           selectedBadge.textContent = 'Cliente seleccionado:';
-          selectedName.textContent = client.nombre || 'Sin nombre';
+          selectedName.textContent = client.nombreNegocio || client.nombreCliente || 'Sin nombre';
         });
         resultsContainer.appendChild(item);
       });
@@ -691,9 +672,12 @@
       const numeric = /^\d+$/.test(q);
       const matches = state.baseData.filter(c => {
         if (numeric) {
-          return (c.ruta || '').toLowerCase().includes(q) || (c.codigo || '').toLowerCase().includes(q);
+          // Buscar por código o nit
+          return (c.codigoNegocio || '').toLowerCase().includes(q) || (c.nitFacturacion || '').toLowerCase().includes(q);
         }
-        return (c.nombre || '').toLowerCase().includes(q);
+        const nombreNegocio = (c.nombreNegocio || '').toLowerCase();
+        const nombreCliente = (c.nombreCliente || '').toLowerCase();
+        return nombreNegocio.includes(q) || nombreCliente.includes(q);
       });
 
       if (matches.length === 0) {
@@ -707,10 +691,16 @@
 
     function ensureUniqueAssignment(day, client) {
       const list = state.assignedByDay[day];
-      const key = (client.ruta || '') + '|' + (client.codigo || '') + '|' + (client.nombre || '');
-      const exists = list.some(c => (
-        (c.ruta || '') + '|' + (c.codigo || '') + '|' + (c.nombre || '')
-      ) === key);
+      const key = [
+        client.codigoNegocio || '',
+        client.nombreNegocio || '',
+        client.nombreCliente || ''
+      ].join('|').toLowerCase();
+      const exists = list.some(c => ([
+        c.codigoNegocio || '',
+        c.nombreNegocio || '',
+        c.nombreCliente || ''
+      ].join('|').toLowerCase()) === key);
       if (!exists) {
         list.push({ ...client });
       }
@@ -742,9 +732,11 @@
           <tr>
             <th>#</th>
             <th>Ruta</th>
-            <th>Código</th>
-            <th>Negocio</th>
+            <th>Código Negocio</th>
+            <th>Nombre Negocio</th>
+            <th>Nombre Cliente</th>
             <th>Dirección</th>
+            <th>Nit</th>
           </tr>
         `;
         table.appendChild(thead);
@@ -755,9 +747,11 @@
           tr.innerHTML = `
             <td>${index + 1}</td>
             <td>${client.ruta || ''}</td>
-            <td>${client.codigo || ''}</td>
-            <td>${client.nombre || ''}</td>
+            <td>${client.codigoNegocio || ''}</td>
+            <td>${client.nombreNegocio || ''}</td>
+            <td>${client.nombreCliente || ''}</td>
             <td>${client.direccion || ''}</td>
+            <td>${client.nitFacturacion || ''}</td>
           `;
           tbody.appendChild(tr);
         });
@@ -777,9 +771,11 @@
 
     function openModal() {
       modalRuta.value = routeInput.value.trim();
-      modalCodigo.value = '';
-      modalNombre.value = '';
+      modalCodigoNegocio.value = '';
+      modalNombreNegocio.value = '';
+      modalNombreCliente.value = '';
       modalDireccion.value = '';
+      modalNit.value = '';
       const day = daySelect.value;
       modalDayInfo.innerHTML = `Se asignará al día <span class="chip-day">${day}</span>`;
       modalBackdrop.style.display = 'flex';
@@ -868,24 +864,57 @@
         return;
       }
 
-      const headers = ['DÍA','ORDEN','RUTA','CÓDIGO','NOMBRE DEL NEGOCIO','DIRECCIÓN'];
+      // Formato exacto para Excel / SAP
+      // Ruta | Día Visita | Orden | Código Negocio | Nombre Negocio | Nombre Cliente | Dirección | Nit Facturación
+      const headers = ['RUTA','DÍA VISITA','ORDEN','CÓDIGO NEGOCIO','NOMBRE NEGOCIO','NOMBRE CLIENTE','DIRECCIÓN','NIT FACTURACIÓN'];
       const rows = [];
       rows.push(headers);
 
-      daysOrder.forEach((dayLabel, idx) => {
+      daysOrder.forEach((dayLabel) => {
         const list = state.assignedByDay[dayLabel];
         if (!list || list.length === 0) return;
-        // Fila título de día
-        rows.push([`DÍA ${idx + 1} – ${dayLabel.toUpperCase()}`,'','','','','']);
+
         list.forEach((client, index) => {
-          const dia = dayLabel;
-          const orden = index + 1;
           const ruta = client.ruta || '';
-          const codigo = client.codigo || '';
-          const nombre = client.nombre || '';
+          const diaVisita = dayLabel;
+          const orden = index + 1; // posición dentro del día
+          const codigoNegocio = client.codigoNegocio || '';
+          const nombreNegocio = client.nombreNegocio || '';
+          const nombreCliente = client.nombreCliente || '';
           const direccion = client.direccion || '';
-          rows.push([dia, String(orden), ruta, codigo, nombre, direccion]);
+          const nit = client.nitFacturacion || '';
+
+          rows.push([
+            ruta,
+            diaVisita,
+            String(orden),
+            codigoNegocio,
+            nombreNegocio,
+            nombreCliente,
+            direccion,
+            nit
+          ]);
         });
+      });
+
+      // Construir CSV (usamos ; como separador para que se vea bien en configuraciones ES)
+      const csvContent = rows
+        .map(cols => cols.map(v => {
+          const s = (v ?? '').toString().replace(/"/g, '""');
+          return `"${s}"`;
+        }).join(';'))
+        .join('\r\n');
+
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Base_reestructurada.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
       });
 
       // Construir CSV (usamos ; como separador para que se vea bien en configuraciones ES)
@@ -921,30 +950,35 @@
 
     saveModalBtn.addEventListener('click', () => {
       const ruta = modalRuta.value.trim();
-      const codigo = modalCodigo.value.trim();
-      const nombre = modalNombre.value.trim();
+      const codigoNegocio = modalCodigoNegocio.value.trim();
+      const nombreNegocio = modalNombreNegocio.value.trim();
+      const nombreCliente = modalNombreCliente.value.trim();
       const direccion = modalDireccion.value.trim();
+      const nitFacturacion = modalNit.value.trim();
 
-      if (!ruta || !codigo || !nombre || !direccion) {
+      if (!codigoNegocio || !nombreNegocio || !nombreCliente || !direccion || !nitFacturacion) {
         alert('Complete todos los campos del nuevo cliente.');
         return;
       }
 
-      const newClient = { ruta, codigo, nombre, direccion };
+      const newClient = { codigoNegocio, nombreNegocio, nombreCliente, direccion, nitFacturacion };
 
       // Agregar a base interna para futuras búsquedas
       state.baseData.push(newClient);
 
       // Asignar al día seleccionado
       const day = daySelect.value;
-      ensureUniqueAssignment(day, newClient);
+      const clientForDay = { ...newClient };
+      const currentRoute = routeInput.value.trim();
+      clientForDay.ruta = ruta || currentRoute || '';
+      ensureUniqueAssignment(day, clientForDay);
 
       closeModal();
 
       // Actualizar mensajes y selección
       state.selectedClient = newClient;
       selectedBadge.textContent = 'Cliente creado y asignado:';
-      selectedName.textContent = newClient.nombre;
+      selectedName.textContent = newClient.nombreNegocio || newClient.nombreCliente;
       searchStatus.textContent = `Cliente nuevo agregado a la base y asignado a ${day}.`;
 
       // Si hay texto de búsqueda, refrescar
@@ -960,19 +994,31 @@
       }
     });
 
-    // Inicialización
-    function initDaySelector() {
-      const todayLabel = getTodayLabel();
-      daySelect.value = todayLabel;
+    // Pequeño test dev opcional (activar con ?devtest=1 en la URL)
+    function runDevTests() {
+      const sample = '2000-1018349;TIENDA LA BENDICION #3;DIEGO TOJIN;EL PROGRESO-SANARATE;CF\n' +
+                     '2000-1165850;TIENDA ESQUIPULAS;RICARDO UZ;EL PROGRESO-SANARATE;9430824-1';
+      const parsed = parseTxtContent(sample);
+      console.assert(parsed.length === 2, 'DevTest: debería leer 2 filas');
+      console.assert(parsed[0].codigoNegocio === '2000-1018349', 'DevTest: código incorrecto en fila 1');
+      console.assert(parsed[1].nombreNegocio.includes('ESQUIPULAS'), 'DevTest: nombre negocio fila 2');
+      console.log('DevTests OK (Registro de Clientes).');
     }
 
+    // Inicialización
     document.addEventListener('DOMContentLoaded', () => {
-      initDaySelector();
+      const todayLabel = getTodayLabel();
+      daySelect.value = todayLabel;
 
-      // Registrar service worker para PWA
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js')
-          .catch(err => console.error('SW registration failed', err));
+      if (window.location.search.includes('devtest=1')) {
+        runDevTests();
+      }
+
+      // Registrar service worker para PWA (solo en entornos seguros y compatibles)
+      if ('serviceWorker' in navigator && window.isSecureContext) {
+        navigator.serviceWorker.register('service-worker.js').catch(() => {
+          // En entornos sandbox simplemente ignoramos el error
+        });
       }
     });
   </script>
