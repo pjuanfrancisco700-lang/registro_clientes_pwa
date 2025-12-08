@@ -513,7 +513,6 @@
           </div>
           <input id="ruta" type="number" value="17029" min="0" />
         </div>
-        
       </div>
       <div class="field">
         <label class="field-label">Día</label>
@@ -529,7 +528,6 @@
           </select>
           <span class="chevron">▾</span>
         </div>
-        
       </div>
     </div>
   </div>
@@ -565,13 +563,11 @@
     <div class="card-header">
       <span class="card-title">Tabla reestructurada</span>
     </div>
-    
 
     <div class="toggle-row">
       <div id="toggleSoloGuardados" class="toggle-shell active">
         <div class="toggle-knob"></div>
       </div>
-      
       <div id="btnLimpiarTodo" class="icon-trash" title="Borrar todo">🗑</div>
       <div id="estadoLimpieza" class="status-text"></div>
     </div>
@@ -715,40 +711,87 @@
   }
 
   // ============================
-  // PARSEO DEL TXT
+  // PARSEO DEL TXT (ROBUSTO CON NIT OPCIONAL)
   // ============================
   function parsearTxtClientes(text) {
-    // TXT en formato vertical de 5 líneas por cliente
+    // TXT en formato vertical pensado como 5 líneas por cliente:
+    // Código, Nombre Negocio, Nombre Cliente, Dirección, NIT/CF (o vacío => CF)
+    // Soportamos \r\n, \n\r, \n, \r y líneas en blanco entre clientes.
     const rawLines = text
-      .split(/\r?\n/)
-      .map(l => l.trim());
-
-    const lineas = rawLines.filter(l => l.length > 0);
-
-    console.log("[DEBUG] Líneas no vacías en TXT:", lineas.length);
-    if (lineas.length < 5) return [];
+      .split(/\r\n|\n\r|\n|\r/)
+      .map(l => (l ?? "").trim());
 
     const clientes = [];
+    let buffer = [];
 
-    for (let i = 0; i + 4 < lineas.length; i += 5) {
-      const codigo        = lineas[i] || "";
-      const nombreNegocio = lineas[i + 1] || "";
-      const nombreCliente = lineas[i + 2] || "";
-      const direccion     = lineas[i + 3] || "";
-      const nit           = (lineas[i + 4] || "CF").toUpperCase();
+    function commitRecord() {
+      if (buffer.length < 4) {
+        buffer = [];
+        return;
+      }
+      const codigoRaw        = buffer[0];
+      const nombreNegocioRaw = buffer[1];
+      const nombreClienteRaw = buffer[2];
+      const direccionRaw     = buffer[3];
+      const nitRaw           = buffer[4] ?? "";
 
-      if (!codigo || !nombreNegocio) continue;
+      if (!codigoRaw || !nombreNegocioRaw || !nombreClienteRaw || !direccionRaw) {
+        buffer = [];
+        return;
+      }
+
+      const codigo        = codigoRaw.trim();
+      const nombreNegocio = nombreNegocioRaw.trim();
+      const nombreCliente = nombreClienteRaw.trim();
+      const direccion     = direccionRaw.trim();
+      const nitNormalizado = nitRaw.trim()
+        ? nitRaw.trim().toUpperCase()
+        : "CF";
 
       clientes.push({
-        codigo: codigo.trim(),
-        nombreNegocio: nombreNegocio.trim(),
-        nombreCliente: nombreCliente.trim(),
-        direccion: direccion.trim(),
-        nit: nit.trim() || "CF",
+        codigo,
+        nombreNegocio,
+        nombreCliente,
+        direccion,
+        nit: nitNormalizado,
       });
+      buffer = [];
     }
 
-    console.log("[DEBUG] Clientes reconocidos:", clientes.length);
+    for (const line of rawLines) {
+      const l = (line || "").trim();
+
+      if (!l) {
+        // Línea en blanco
+        if (buffer.length === 0) {
+          // línea vacía entre registros, la ignoramos
+          continue;
+        }
+        if (buffer.length === 4) {
+          // Tenemos código, negocio, cliente y dirección pero NIT vacío => CF
+          buffer.push("");
+          commitRecord();
+        } else if (buffer.length > 0 && buffer.length < 4) {
+          // bloque incompleto (ruidoso) => se descarta
+          buffer = [];
+        }
+        continue;
+      }
+
+      buffer.push(l);
+
+      if (buffer.length === 5) {
+        commitRecord();
+      }
+    }
+
+    // Al finalizar, si quedó un bloque completo o casi completo (4 líneas) lo procesamos
+    if (buffer.length === 5 || buffer.length === 4) {
+      if (buffer.length === 4) buffer.push("");
+      commitRecord();
+    }
+
+    console.log("[DEBUG] Clientes reconocidos (parsearTxtClientes):", clientes.length);
     return clientes;
   }
 
@@ -795,20 +838,31 @@
   }
 
   // ============================
-  // TABLA REESTRUCTURADA
+  // TABLA REESTRUCTURADA + VISIBILIDAD
   // ============================
+  function actualizarVisibilidadTabla() {
+    const toggle = document.getElementById("toggleSoloGuardados");
+    const wrapper = document.getElementById("tablaWrapper");
+    if (!toggle || !wrapper) return;
+    const encendido = toggle.classList.contains("active");
+    // Encendido = OCULTA tabla, Apagado = MUESTRA tabla
+    wrapper.style.display = encendido ? "none" : "block";
+  }
+
   function construirTabla() {
     const wrapper = document.getElementById("tablaWrapper");
+    if (!wrapper) return;
     const ruta = document.getElementById("ruta").value.trim();
     const dia = document.getElementById("dia").value;
-    const soloGuardados = document
-      .getElementById("toggleSoloGuardados")
-      .classList.contains("active");
 
     let datos = [...registrosGuardados];
 
-    if (soloGuardados) {
-      datos = datos.filter(r => r.ruta === ruta && r.diaVisita === dia);
+    // Siempre filtramos por ruta y día seleccionados
+    if (ruta) {
+      datos = datos.filter(r => r.ruta === ruta);
+    }
+    if (dia) {
+      datos = datos.filter(r => r.diaVisita === dia);
     }
 
     if (datos.length === 0) {
@@ -817,8 +871,12 @@
       return;
     }
 
+    // Ordenar por día y luego por orden de visita
+    const ordenDias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
     datos.sort((a, b) => {
-      if (a.diaVisita !== b.diaVisita) return a.diaVisita.localeCompare(b.diaVisita);
+      const da = ordenDias.indexOf(a.diaVisita);
+      const db = ordenDias.indexOf(b.diaVisita);
+      if (da !== db) return da - db;
       return (a.orden || 0) - (b.orden || 0);
     });
 
@@ -852,21 +910,29 @@
   }
 
   // ============================
-  // EXPORTAR EXCEL (CSV) - UTF8 y sin caracteres raros
+  // EXPORTAR EXCEL (CSV) - UTF8
   // ============================
   function descargarExcel() {
     const ruta = document.getElementById("ruta").value.trim();
-    const dia = document.getElementById("dia").value;
-    let datos = registrosGuardados.filter(
-      r => r.ruta === ruta && r.diaVisita === dia
-    );
+
+    // Exportar SIEMPRE todos los días guardados de la ruta actual
+    let datos = [...registrosGuardados];
+    if (ruta) {
+      datos = datos.filter(r => r.ruta === ruta);
+    }
 
     if (datos.length === 0) {
-      alert("No hay datos para exportar en la ruta y día actuales.");
+      alert("No hay datos para exportar desde la tabla reestructurada.");
       return;
     }
 
-    datos.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+    const ordenDias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    datos.sort((a, b) => {
+      const da = ordenDias.indexOf(a.diaVisita);
+      const db = ordenDias.indexOf(b.diaVisita);
+      if (da !== db) return da - db;
+      return (a.orden || 0) - (b.orden || 0);
+    });
 
     const encabezados = [
       "Ruta",
@@ -894,27 +960,21 @@
       ]);
     });
 
-    // CSV con ; y saltos de línea correctos
     const csv = filas
       .map(row => row
-        .map(v => {
-          const value = (v || "").toString().replace(/"/g, '""');
-          return `"${value}"`;
-        })
-        .join(";"))
+        .map(v => `"${(v || "").toString().replace(/"/g, '""')}"`)
+        .join(";")
+      )
       .join("\r\n");
 
-    // BOM UTF-8 para que Excel muestre bien las tildes
     const bom = "\uFEFF";
     const contenido = bom + csv;
 
-    const blob = new Blob([contenido], {
-      type: "text/csv;charset=utf-8;"
-    });
+    const blob = new Blob([contenido], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `restructura_r${ruta}_${dia}.csv`;
+    a.download = ruta ? `restructura_r${ruta}_completa.csv` : "restructura_completa.csv";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1020,27 +1080,17 @@
   // LIMPIAR REGISTROS
   // ============================
   function limpiarRegistros() {
-    const ruta = document.getElementById("ruta").value.trim();
-    const dia = document.getElementById("dia").value;
-
-    // Mensaje claro: solo se borran los registros de la ruta y día actuales
-    const mensaje = ruta
-      ? `Se borrarán todos los registros guardados de la ruta ${ruta} para el día ${dia}. ¿Desea continuar?`
-      : `Se borrarán todos los registros guardados para el día ${dia}. ¿Desea continuar?`;
-
+    // Borrar TODO el contenido de la tabla reestructurada (todas las rutas y días)
+    const mensaje = "Se borrarán TODOS los registros guardados de la tabla reestructurada (todas las rutas y días). ¿Desea continuar?";
     if (!confirm(mensaje)) return;
 
-    // Elimina SOLO los registros de la tabla actual (ruta + día seleccionados)
-    registrosGuardados = registrosGuardados.filter(
-      r => !(r.ruta === ruta && r.diaVisita === dia)
-    );
-
+    registrosGuardados = [];
     guardarEnLocalStorage();
     construirTabla();
 
     const msg = document.getElementById("estadoLimpieza");
     if (msg) {
-      msg.textContent = "Registros de la tabla actual eliminados correctamente.";
+      msg.textContent = "Todos los registros fueron eliminados correctamente.";
       msg.className = "status-text status-ok";
       setTimeout(() => {
         msg.textContent = "";
@@ -1107,6 +1157,48 @@
     const r4 = parsearTxtClientes(txt4);
     console.assert(r4.length === 1, "Test4: solo 1 cliente válido por bloque completo");
 
+    // Test 5: cliente sin NIT (debe caer como CF)
+    const txt5 = [
+      "2000-9999999",
+      "TIENDA SIN NIT",
+      "MARIA LOPEZ",
+      "GUATEMALA, ZONA 5",
+      ""
+    ].join("\n");
+    const r5 = parsearTxtClientes(txt5);
+    console.assert(r5.length === 1, "Test5: debería haber 1 cliente");
+    console.assert(r5[0].nit === "CF", "Test5: NIT vacío se normaliza a CF");
+
+    // Test 6: dos clientes separados por una línea en blanco (debe leer los 2)
+    const txt6 = [
+      "2000-1111111",
+      "TIENDA UNO",
+      "CLIENTE UNO",
+      "DIR UNO",
+      "CF",
+      "",
+      "2000-2222222",
+      "TIENDA DOS",
+      "CLIENTE DOS",
+      "DIR DOS",
+      "CF"
+    ].join("\n");
+    const r6 = parsearTxtClientes(txt6);
+    console.assert(r6.length === 2, "Test6: debería haber 2 clientes aunque haya línea en blanco (join corregido)");
+
+    // Test 7: líneas en blanco al inicio y al final (debe leer 1 cliente)
+    const txt7 = [
+      "",
+      "2000-3333333",
+      "TIENDA BORDE",
+      "CLIENTE BORDE",
+      "DIR BORDE",
+      "CF",
+      ""
+    ].join("\n");
+    const r7 = parsearTxtClientes(txt7);
+    console.assert(r7.length === 1, "Test7: debería haber 1 cliente con líneas en blanco de borde");
+
     console.groupEnd();
   }
 
@@ -1135,8 +1227,9 @@
     document
       .getElementById("rutaInputShell")
       .addEventListener("click", e => {
-        const isIcon = e.target.closest(".icon-folder");
-        if (isIcon) {
+        // Si toca la carpeta o cualquier parte del contenedor (menos el input), abre el selector de archivo
+        const isInput = e.target.tagName === "INPUT";
+        if (!isInput) {
           document.getElementById("fileInput").click();
         }
       });
@@ -1167,13 +1260,15 @@
         reader.readAsText(file, "utf-8");
       });
 
-    document
-      .getElementById("toggleSoloGuardados")
-      .addEventListener("click", () => {
-        const t = document.getElementById("toggleSoloGuardados");
-        t.classList.toggle("active");
-        construirTabla();
+    const toggle = document.getElementById("toggleSoloGuardados");
+    if (toggle) {
+      // Estado inicial: activo = tabla OCULTA
+      actualizarVisibilidadTabla();
+      toggle.addEventListener("click", () => {
+        toggle.classList.toggle("active");
+        actualizarVisibilidadTabla();
       });
+    }
 
     document
       .getElementById("btnLimpiarTodo")
