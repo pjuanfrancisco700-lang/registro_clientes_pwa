@@ -6,14 +6,14 @@
   <title>Registro de Clientes 2</title>
   <style>
     :root {
-      --bg: #E5E7EB;
-      --card: #FFFFFF;
-      --accent: #0F5C9A;
-      --accent-soft: #E3ECF5;
-      --border: #D1D5DB;
-      --text-main: #111827;
-      --text-soft: #6B7280;
-      --danger: #B91C1C;
+      --bg: #F5F5F7;           /* fondo gris muy claro tipo iOS */
+      --card: #FFFFFF;         /* tarjetas blancas limpias */
+      --accent: #111111;       /* acento negro/gris muy oscuro para botones */
+      --accent-soft: #E5E5E5;  /* gris suave para fondos y líneas */
+      --border: #D4D4D8;       /* borde gris claro */
+      --text-main: #111111;    /* texto principal oscuro */
+      --text-soft: #6B7280;    /* texto secundario gris */
+      --danger: #B91C1C;       /* mensajes de error */
     }
 
     * {
@@ -23,9 +23,10 @@
 
     body {
       margin: 0;
-      padding: 16px;
+      padding: 20px 16px;
       background: var(--bg);
       color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
     }
 
     .app-shell {
@@ -57,10 +58,11 @@
     .card {
       overflow: hidden;
       background: var(--card);
-      border-radius: 18px;
-      padding: 16px 18px;
-      box-shadow: 0 8px 18px rgba(15, 76, 129, 0.08);
-      margin-bottom: 14px;
+      border-radius: 20px;
+      padding: 18px 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.04);
+      margin-bottom: 16px;
+      border: 1px solid rgba(212, 212, 216, 0.8);
     }
 
     .card-header {
@@ -103,10 +105,10 @@
     .input-shell {
       display: flex;
       align-items: center;
-      border-radius: 12px;
+      border-radius: 999px;
       border: 1px solid var(--border);
-      background: #F9FAFB;
-      padding: 0 12px;
+      background: #FFFFFF;
+      padding: 0 14px;
       height: 44px;
       gap: 8px;
     }
@@ -154,11 +156,11 @@
       flex: 1;
       display: flex;
       align-items: center;
-      border-radius: 12px;
+      border-radius: 999px;
       border: 1px solid var(--border);
-      background: #F9FAFB;
-      padding: 0 12px;
-      height: 46px;
+      background: #FFFFFF;
+      padding: 0 14px;
+      height: 44px;
       gap: 8px;
     }
 
@@ -176,45 +178,48 @@
     }
 
     .btn {
-      border-radius: 12px;
+      border-radius: 999px;
       border: none;
-      padding: 0 16px;
+      padding: 0 20px;
       height: 44px;
-      font-size: 14px;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.15s ease;
+      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.15s ease;
       white-space: nowrap;
     }
 
     .btn-primary {
       background: var(--accent);
-      color: #fff;
+      color: #FFFFFF;
       width: 100%;
-      box-shadow: 0 6px 14px rgba(15, 92, 154, 0.25);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
     }
 
     .btn-primary:active {
       transform: translateY(1px);
-      box-shadow: 0 3px 7px rgba(15, 92, 154, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
     .btn-secondary {
-      background: #EEF0F4;
+      background: #F3F4F6;
       color: var(--text-main);
+      border-radius: 999px;
     }
 
     .btn-icon {
       width: 44px;
       padding: 0;
-      border-radius: 12px;
+      border-radius: 999px;
       background: var(--accent);
-      color: #fff;
-      font-size: 22px;
-      box-shadow: 0 5px 10px rgba(15, 92, 154, 0.25);
+      color: #FFFFFF;
+      font-size: 20px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
     }
 
     .helper-text {
@@ -253,15 +258,15 @@
     }
 
     .toggle-shell {
-      width: 56px;
-      height: 30px;
+      width: 60px;
+      height: 32px;
       border-radius: 999px;
       background: #E5E7EB;
       display: flex;
       align-items: center;
       padding: 3px;
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: background 0.18s ease;
     }
 
     .toggle-shell.active {
@@ -269,13 +274,13 @@
     }
 
     .toggle-knob {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       border-radius: 999px;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      background: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
       transform: translateX(0);
-      transition: transform 0.15s ease;
+      transition: transform 0.18s ease;
     }
 
     .toggle-shell.active .toggle-knob {
@@ -285,15 +290,22 @@
     .icon-trash {
       width: 34px;
       height: 34px;
-      border-radius: 10px;
+      border-radius: 50%;
       border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 16px;
       color: var(--text-soft);
-      background: #F9FAFB;
+      background: #FFFFFF;
       cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    }
+
+    .icon-trash.active-trash {
+      background: #FEE2E2;
+      border-color: #F97316;
+      transform: scale(0.96);
     }
 
     .bottom-buttons {
@@ -308,10 +320,12 @@
     }
 
     .btn-ghost {
-      background: #F9FAFB;
-      border-radius: 12px;
+      background: #FFFFFF;
+      border-radius: 999px;
       border: 1px solid var(--border);
       font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       font-weight: 600;
       color: var(--text-main);
     }
@@ -369,8 +383,9 @@
     }
 
     .suggestions-item {
-      padding: 6px 10px;
+      padding: 8px 12px;
       cursor: pointer;
+      font-size: 14px;
     }
 
     .suggestions-item:hover {
@@ -494,13 +509,11 @@
         <label class="field-label">Ruta</label>
         <div class="input-shell" id="rutaInputShell">
           <div class="icon-folder" title="Cargar base .txt">
-            📁
+            &#x1F4C2;
           </div>
           <input id="ruta" type="number" value="17029" min="0" />
         </div>
-        <div class="helper-text">
-          La ruta se usará en todos los clientes guardados.
-        </div>
+        
       </div>
       <div class="field">
         <label class="field-label">Día</label>
@@ -516,9 +529,7 @@
           </select>
           <span class="chevron">▾</span>
         </div>
-        <div class="helper-text">
-          Día de visita para la reestructura.
-        </div>
+        
       </div>
     </div>
   </div>
@@ -554,18 +565,15 @@
     <div class="card-header">
       <span class="card-title">Tabla reestructurada</span>
     </div>
-    <div class="helper-text">
-      Presione <strong>Reestructura</strong> para ver los clientes organizados por día y orden de visita.
-    </div>
+    
 
     <div class="toggle-row">
       <div id="toggleSoloGuardados" class="toggle-shell active">
         <div class="toggle-knob"></div>
       </div>
-      <span class="helper-text">Mostrar solo clientes guardados.</span>
-      <div id="btnLimpiarTodo" class="icon-trash" title="Borrar todos los registros guardados">
-        🗑
-      </div>
+      
+      <div id="btnLimpiarTodo" class="icon-trash" title="Borrar todo">🗑</div>
+      <div id="estadoLimpieza" class="status-text"></div>
     </div>
 
     <div class="bottom-buttons">
@@ -844,7 +852,7 @@
   }
 
   // ============================
-  // EXPORTAR EXCEL (TSV)
+  // EXPORTAR EXCEL (CSV) - UTF8 y sin caracteres raros
   // ============================
   function descargarExcel() {
     const ruta = document.getElementById("ruta").value.trim();
@@ -876,7 +884,7 @@
     datos.forEach(r => {
       filas.push([
         r.ruta,
-        r.diaVisita,
+        (r.diaVisita || "").toString().toUpperCase(),
         r.orden,
         r.codigo,
         r.nombreNegocio,
@@ -886,17 +894,27 @@
       ]);
     });
 
-    const tsv = filas
-      .map(row => row.map(v => `"${(v || "").toString().replace(/"/g, '""')}"`).join("\t"))
+    // CSV con ; y saltos de línea correctos
+    const csv = filas
+      .map(row => row
+        .map(v => {
+          const value = (v || "").toString().replace(/"/g, '""');
+          return `"${value}"`;
+        })
+        .join(";"))
       .join("\r\n");
 
-    const blob = new Blob([tsv], {
-      type: "text/tab-separated-values;charset=utf-8;"
+    // BOM UTF-8 para que Excel muestre bien las tildes
+    const bom = "\uFEFF";
+    const contenido = bom + csv;
+
+    const blob = new Blob([contenido], {
+      type: "text/csv;charset=utf-8;"
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `restructura_r${ruta}_${dia}.txt`;
+    a.download = `restructura_r${ruta}_${dia}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1002,10 +1020,38 @@
   // LIMPIAR REGISTROS
   // ============================
   function limpiarRegistros() {
-    if (!confirm("¿Borrar todos los registros guardados en este dispositivo?")) return;
-    registrosGuardados = [];
+    const ruta = document.getElementById("ruta").value.trim();
+    const dia = document.getElementById("dia").value;
+
+    // Mensaje claro: solo se borran los registros de la ruta y día actuales
+    const mensaje = ruta
+      ? `Se borrarán todos los registros guardados de la ruta ${ruta} para el día ${dia}. ¿Desea continuar?`
+      : `Se borrarán todos los registros guardados para el día ${dia}. ¿Desea continuar?`;
+
+    if (!confirm(mensaje)) return;
+
+    // Elimina SOLO los registros de la tabla actual (ruta + día seleccionados)
+    registrosGuardados = registrosGuardados.filter(
+      r => !(r.ruta === ruta && r.diaVisita === dia)
+    );
+
     guardarEnLocalStorage();
     construirTabla();
+
+    const msg = document.getElementById("estadoLimpieza");
+    if (msg) {
+      msg.textContent = "Registros de la tabla actual eliminados correctamente.";
+      msg.className = "status-text status-ok";
+      setTimeout(() => {
+        msg.textContent = "";
+      }, 3000);
+    }
+
+    const trash = document.getElementById("btnLimpiarTodo");
+    if (trash) {
+      trash.classList.add("active-trash");
+      setTimeout(() => trash.classList.remove("active-trash"), 180);
+    }
   }
 
   // ============================
@@ -1047,6 +1093,19 @@
     // Test 3: archivo vacío
     const r3 = parsearTxtClientes("");
     console.assert(r3.length === 0, "Test3: sin clientes en texto vacío");
+
+    // Test 4: bloque incompleto (7 líneas -> solo 1 cliente válido)
+    const txt4 = [
+      "2000-5555555",
+      "TIENDA PRUEBA",
+      "JUAN PEREZ",
+      "GUATEMALA, ZONA 1",
+      "CF",
+      "CODIGO-INCOMPLETO",
+      "SOLO DOS LINEAS"
+    ].join("\n");
+    const r4 = parsearTxtClientes(txt4);
+    console.assert(r4.length === 1, "Test4: solo 1 cliente válido por bloque completo");
 
     console.groupEnd();
   }
